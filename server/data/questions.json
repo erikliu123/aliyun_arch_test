@@ -1,0 +1,527 @@
+[
+  {
+    "id": "arch-001",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某电商平台大促期间预计流量增长10倍，核心链路为：用户→SLB→ECS（应用层）→RDS（MySQL）。以下哪种方案最能有效应对数据库层的读压力？",
+    "options": [
+      { "key": "A", "text": "将 RDS 升配到最高规格" },
+      { "key": "B", "text": "增加只读实例 + 读写分离，同时引入 Redis 缓存热点数据" },
+      { "key": "C", "text": "将 RDS 替换为 PolarDB，开启 Serverless 弹性" },
+      { "key": "D", "text": "对 RDS 做分库分表" }
+    ],
+    "answer": "B",
+    "explanation": "大促场景的读压力剧增，最有效的组合是：只读实例承接读流量（线性扩展读能力）+ Redis 缓存热点商品/库存数据（毫秒级响应，减少 90%+ 数据库读请求）。升配有上限且成本高；PolarDB Serverless 适合常态波动但大促瞬时 10 倍需要预热；分库分表改造成本大且短期内无法完成。"
+  },
+  {
+    "id": "arch-002",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "一个全球化 SaaS 应用需要在中国和海外同时提供服务，要求两地数据实时同步、就近访问、且满足中国数据合规要求。最佳架构方案是？",
+    "options": [
+      { "key": "A", "text": "单地域部署 + 全球 CDN 加速" },
+      { "key": "B", "text": "中国和海外各部署独立应用，通过 DTS 做数据双向同步，用 GTM 做全球流量调度" },
+      { "key": "C", "text": "使用单个 PolarDB 全球数据库" },
+      { "key": "D", "text": "在海外部署应用，中国用户通过全球加速访问" }
+    ],
+    "answer": "B",
+    "explanation": "满足数据合规（中国数据留在境内）+ 就近访问 + 数据同步的最佳方案是：两地独立部署 + DTS 双向同步。GTM（全局流量管理器）根据用户地理位置智能解析到最近的集群。单地域+CDN 只能加速静态内容；PolarDB 全球数据库有跨境延迟；海外部署+加速无法满足合规。"
+  },
+  {
+    "id": "arch-003",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "微服务架构下，服务 A 调用服务 B 和服务 C，要求 B 和 C 的操作要么同时成功要么同时失败。但 B 和 C 使用不同的数据库。最适合的分布式事务方案是？",
+    "options": [
+      { "key": "A", "text": "使用 XA 两阶段提交" },
+      { "key": "B", "text": "使用 Seata AT 模式（自动补偿）" },
+      { "key": "C", "text": "使用 TCC 模式（Try-Confirm-Cancel）" },
+      { "key": "D", "text": "使用消息最终一致性（RocketMQ 事务消息）" }
+    ],
+    "answer": "C",
+    "explanation": "跨服务跨库的强一致事务场景，TCC 模式最适合：Try 阶段预留资源（如冻结库存/金额），Confirm 阶段确认，Cancel 阶段回滚。性能优于 XA（无长事务锁），可控性优于 AT 模式（AT 对 SQL 有解析限制）。消息最终一致性适合对一致性要求稍低的场景（如订单→积分）。"
+  },
+  {
+    "id": "arch-004",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "一个日志分析平台每天产生 5TB 原始日志，需要实时查询（秒级）最近 7 天数据，同时保留 1 年历史数据供离线分析。最优的存储架构是？",
+    "options": [
+      { "key": "A", "text": "全部存入 Elasticsearch" },
+      { "key": "B", "text": "SLS 实时查询近 7 天 + 自动投递到 OSS + MaxCompute 做离线分析" },
+      { "key": "C", "text": "全部存入 RDS MySQL" },
+      { "key": "D", "text": "全部存入 HBase" }
+    ],
+    "answer": "B",
+    "explanation": "热冷分层存储是大数据量日志的最优解：SLS 提供实时写入和秒级查询能力（近 7 天热数据），通过投递功能自动将过期日志归档到 OSS（极低存储成本），MaxCompute 可以直接读取 OSS 上的数据做离线分析。全量 ES 成本高且维护复杂；RDS 不适合日志场景；HBase 查询分析能力弱。"
+  },
+  {
+    "id": "arch-005",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某视频平台要实现用户上传视频后自动转码为多种分辨率，并在转码完成后通知业务系统更新状态。最合理的事件驱动架构是？",
+    "options": [
+      { "key": "A", "text": "ECS 轮询 OSS 检查新文件" },
+      { "key": "B", "text": "OSS 事件通知 → 函数计算（调用媒体转码 MPS）→ MPS 回调 → 函数计算（更新数据库状态）" },
+      { "key": "C", "text": "在上传接口中同步调用转码 API" },
+      { "key": "D", "text": "使用定时任务每分钟扫描新上传文件" }
+    ],
+    "answer": "B",
+    "explanation": "事件驱动架构：OSS PutObject 事件自动触发 FC 函数 → FC 提交转码任务到 MPS → MPS 转码完成后回调通知另一个 FC 函数 → 更新业务数据库状态。全程异步、无服务器、按需付费。轮询和定时任务有延迟且浪费资源；同步转码会阻塞上传请求。"
+  },
+  {
+    "id": "arch-006",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某金融系统要求 RPO=0（零数据丢失）且 RTO<30秒，跨可用区容灾。在阿里云上的最佳数据库方案是？",
+    "options": [
+      { "key": "A", "text": "RDS MySQL 高可用版（一主一备同 AZ）" },
+      { "key": "B", "text": "RDS MySQL 三节点企业版（跨 AZ 三副本 Paxos 协议）" },
+      { "key": "C", "text": "PolarDB MySQL（计算存储分离 + 三副本）" },
+      { "key": "D", "text": "自建 MySQL MGR 集群" }
+    ],
+    "answer": "B",
+    "explanation": "RDS 三节点企业版基于 Paxos 协议在三个 AZ 部署三副本，任何事务必须获得多数派确认才算提交，确保 RPO=0。故障时自动选举，RTO 通常在 30 秒内。PolarDB 存储层虽然三副本但切换机制不同；高可用版只有两节点，主备切换有小概率数据延迟；自建 MGR 运维成本高。"
+  },
+  {
+    "id": "arch-007",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "一个 IoT 平台需要接入百万级设备，每个设备每秒上报一条数据，要求实时处理并存储时序数据。最合适的架构组合是？",
+    "options": [
+      { "key": "A", "text": "MQTT 服务 → ECS 集群处理 → MySQL 存储" },
+      { "key": "B", "text": "IoT 平台（设备接入）→ 规则引擎 → 流计算 Flink + TSDB（时序数据库）" },
+      { "key": "C", "text": "SLB → ECS WebSocket → Redis 存储" },
+      { "key": "D", "text": "API 网关 → 函数计算 → TableStore" }
+    ],
+    "answer": "B",
+    "explanation": "百万级设备高并发写入场景：阿里云 IoT 平台原生支持 MQTT 大规模设备接入和管理，规则引擎做数据路由，Flink 做实时流处理（聚合/异常检测），TSDB 专为时序数据设计（高写入吞吐、高压缩比、时间范围查询优化）。MySQL 不适合时序大量写入；Redis 不适合持久化大量历史数据；FC 有并发限制。"
+  },
+  {
+    "id": "arch-008",
+    "category": "ARCH",
+    "categoryName": "架构设计",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某业务从单体应用拆分为微服务后，出现了服务间调用链路过长、排查问题困难的情况。应该引入哪些可观测性组件？",
+    "options": [
+      { "key": "A", "text": "只需要 SLS 收集日志即可" },
+      { "key": "B", "text": "链路追踪（ARMS/Jaeger）+ 应用监控（ARMS）+ 日志服务（SLS）三位一体" },
+      { "key": "C", "text": "在每个服务中加入详细的 print 日志" },
+      { "key": "D", "text": "只需要 Prometheus + Grafana 监控指标" }
+    ],
+    "answer": "B",
+    "explanation": "微服务可观测性三大支柱：Traces（链路追踪，定位跨服务调用的性能瓶颈和故障节点）、Metrics（应用/系统指标监控，发现异常趋势）、Logs（详细日志，辅助根因分析）。ARMS 提供全链路追踪和应用性能监控，SLS 提供结构化日志查询。单一维度无法全面定位问题。"
+  },
+  {
+    "id": "solution-001",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "客户需要将 IDC 中的 Oracle 数据库迁移到阿里云，数据量 20TB，要求停机时间不超过 1 小时。最佳迁移方案是？",
+    "options": [
+      { "key": "A", "text": "mysqldump 全量导出后上传到云" },
+      { "key": "B", "text": "使用 DTS 进行全量 + 增量实时同步，待数据追平后择机切换" },
+      { "key": "C", "text": "使用闪电立方（数据迁移物理设备）" },
+      { "key": "D", "text": "通过专线搭建 DG（Data Guard）" }
+    ],
+    "answer": "B",
+    "explanation": "DTS 支持 Oracle→PolarDB/RDS 的异构迁移，通过全量+增量同步实现近零停机迁移：先全量同步数据，期间增量 CDC 持续追赶源端变更，当延迟降至秒级后执行切换（停写→等追平→切业务），停机控制在分钟级。mysqldump 不适用 Oracle；闪电立方适合网络带宽受限的场景但切换时间长；DG 是 Oracle 同构方案。"
+  },
+  {
+    "id": "solution-002",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "一个在线教育平台需要支持万人同时在线的实时音视频互动课堂，同时要录制并保存课程回放。最合理的产品组合是？",
+    "options": [
+      { "key": "A", "text": "自建 WebRTC 服务器 + ECS 录制" },
+      { "key": "B", "text": "音视频通信 RTC + 视频直播 + 媒体处理 MPS + OSS + CDN" },
+      { "key": "C", "text": "直接使用视频直播服务" },
+      { "key": "D", "text": "使用短视频 SDK + 点播服务" }
+    ],
+    "answer": "B",
+    "explanation": "万人互动课堂需要：RTC 提供低延迟实时音视频通信（师生互动），旁路推流到视频直播服务（观看学生），自动录制到 OSS，MPS 对录制文件转码处理后通过 CDN 分发回放。单纯直播不支持双向互动；自建 WebRTC 难以支撑万人规模；短视频方案不适合实时场景。"
+  },
+  {
+    "id": "solution-003",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "客户的核心交易系统部署在阿里云华东2，需要实现同城双活（两个可用区都能处理写请求）。数据一致性方面最可行的方案是？",
+    "options": [
+      { "key": "A", "text": "两个 AZ 各部署独立 RDS，应用层双写" },
+      { "key": "B", "text": "使用 PolarDB-X 分布式数据库，跨 AZ 部署 DN 节点，基于 Paxos 保证一致性" },
+      { "key": "C", "text": "RDS 主实例在 AZ-A，备实例在 AZ-B，两边都接收写请求" },
+      { "key": "D", "text": "两个 AZ 各用 Redis 做写入缓冲，异步同步到一个 RDS" }
+    ],
+    "answer": "B",
+    "explanation": "同城双活的核心难点是数据一致性。PolarDB-X 分布式数据库支持跨 AZ 部署数据节点（DN），基于 Paxos/Raft 协议保证数据强一致，两个 AZ 的 CN（计算节点）都能接收写请求。应用层双写极易产生数据冲突；RDS 备实例不能接收写请求；Redis 缓冲方案无法保证一致性。"
+  },
+  {
+    "id": "solution-004",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某互联网公司每月云费用超过 200 万，CTO 要求降本 30%。以下哪个策略组合最有效？",
+    "options": [
+      { "key": "A", "text": "全部实例降配到最低规格" },
+      { "key": "B", "text": "RI（预留实例券）覆盖基线负载 + 弹性伸缩应对峰值 + 抢占式实例用于非核心任务 + 存储生命周期策略" },
+      { "key": "C", "text": "全部从按量付费改为包年包月" },
+      { "key": "D", "text": "减少可用区数量，不做容灾" }
+    ],
+    "answer": "B",
+    "explanation": "系统性降本组合拳：RI/节省计划覆盖稳定基线负载（比按量省 30-60%），弹性伸缩避免峰值过度预留，抢占式实例用于大数据计算/CI/CD 等可中断任务（省 70-90%），OSS 生命周期自动降冷减少存储费用。全部降配影响性能；全包年没有弹性；减少容灾增加风险。"
+  },
+  {
+    "id": "solution-005",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "一个 API 网关每天处理 1 亿次请求，需要实现：限流、鉴权、协议转换、灰度发布、API 版本管理。最合适的阿里云产品方案是？",
+    "options": [
+      { "key": "A", "text": "自建 Nginx + Lua 脚本" },
+      { "key": "B", "text": "API 网关（云原生网关）+ 微服务引擎 MSE" },
+      { "key": "C", "text": "SLB 四层转发 + ECS Nginx" },
+      { "key": "D", "text": "函数计算 + API 网关触发器" }
+    ],
+    "answer": "B",
+    "explanation": "云原生 API 网关原生支持限流、JWT/OAuth 鉴权、协议转换（HTTP→gRPC 等）、路由策略；MSE 微服务引擎提供灰度发布（标签路由）和服务管理能力。两者配合完整覆盖需求且免运维。自建 Nginx 功能需要大量开发和运维；SLB 不具备 API 管理能力；FC 有并发和性能限制。"
+  },
+  {
+    "id": "solution-006",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "客户想在阿里云上构建数据湖，要求：统一存储层、支持流批一体处理、兼容开源生态（Spark/Flink/Hive）。推荐方案是？",
+    "options": [
+      { "key": "A", "text": "OSS 作为统一存储 + Delta Lake/Hudi 格式 + EMR（Spark/Flink）" },
+      { "key": "B", "text": "全部使用 MaxCompute" },
+      { "key": "C", "text": "HDFS 集群 + Hive" },
+      { "key": "D", "text": "RDS + 数据仓库" }
+    ],
+    "answer": "A",
+    "explanation": "现代数据湖架构：OSS 提供高性价比的统一存储层（存算分离），Delta Lake/Hudi 提供 ACID 事务和增量处理能力，EMR（Spark）做批处理，Flink 做实时流处理，均兼容开源生态。MaxCompute 是封闭生态；HDFS 存算耦合成本高；RDS 不适合大数据分析。"
+  },
+  {
+    "id": "solution-007",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某游戏公司需要在新游上线时快速扩容数百台 ECS，要求所有实例配置一致且 5 分钟内全部就绪。最佳方案是？",
+    "options": [
+      { "key": "A", "text": "人工逐台创建并配置" },
+      { "key": "B", "text": "制作黄金镜像 + 弹性伸缩组 + 实例启动模板 + User Data 脚本" },
+      { "key": "C", "text": "使用 Terraform 批量创建" },
+      { "key": "D", "text": "使用容器服务 ACK + 节点池" }
+    ],
+    "answer": "B",
+    "explanation": "游戏服务器通常需要裸 ECS 性能。黄金镜像预装所有软件和配置（省去安装时间），启动模板定义实例规格/网络/磁盘配置，ESS 弹性伸缩组负责批量创建，User Data 脚本执行最后的动态配置（如注册到服务发现）。整体可在分钟级完成数百台扩容。Terraform 适合基础设施编排但启动速度不如 ESS；ACK 适合容器化应用。"
+  },
+  {
+    "id": "solution-008",
+    "category": "SOLUTION",
+    "categoryName": "方案选择",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某证券公司的交易系统需要极低延迟（微秒级），数据在传输中必须加密，且要满足等保三级。网络层应该如何设计？",
+    "options": [
+      { "key": "A", "text": "普通 VPC + SLB" },
+      { "key": "B", "text": "增强型 eRDMA 网络实例 + 加密专线 + 安全组最小化 + VPC 流日志" },
+      { "key": "C", "text": "经典网络 + VPN" },
+      { "key": "D", "text": "普通 VPC + IPsec VPN" }
+    ],
+    "answer": "B",
+    "explanation": "证券交易极低延迟要求 eRDMA 网络（微秒级节点间通信）；加密专线（物理隔离+加密传输）连接 IDC 和云；安全组最小权限控制+VPC 流日志满足等保审计要求。普通网络延迟在毫秒级，不满足交易场景；VPN 加密有额外开销增加延迟；经典网络已不推荐使用。"
+  },
+  {
+    "id": "k8s-001",
+    "category": "K8S",
+    "categoryName": "容器与云原生",
+    "difficulty": 3,
+    "type": "single",
+    "question": "ACK 集群中某个 Deployment 的 Pod 频繁 OOMKilled，requests.memory=512Mi，limits.memory=1Gi。最合理的分析方向是？",
+    "options": [
+      { "key": "A", "text": "直接把 limits 调到 4Gi" },
+      { "key": "B", "text": "通过 ARMS/Prometheus 查看内存使用趋势，确认是内存泄漏还是业务峰值超 limit，据此决定修复代码或调整配额" },
+      { "key": "C", "text": "删除 limits 配置" },
+      { "key": "D", "text": "增加 HPA 副本数" }
+    ],
+    "answer": "B",
+    "explanation": "正确的排查流程：先通过监控分析内存使用模式——持续增长直到 OOM 大概率是内存泄漏（应修代码）；请求峰值时突破 limit 则考虑调整 limit 或优化内存使用。盲目加大 limit 可能掩盖泄漏问题；删除 limit 会影响其他 Pod 的调度；增加副本不解决单 Pod 内存问题。"
+  },
+  {
+    "id": "k8s-002",
+    "category": "K8S",
+    "categoryName": "容器与云原生",
+    "difficulty": 3,
+    "type": "single",
+    "question": "在 ACK 中实现金丝雀发布，将 5% 流量导入新版本验证，最推荐的方案是？",
+    "options": [
+      { "key": "A", "text": "手动调整新旧 Deployment 的副本数比例" },
+      { "key": "B", "text": "使用 ALB Ingress 的 canary 注解 + 基于权重的流量分配" },
+      { "key": "C", "text": "使用两个 Service 分别暴露新旧版本" },
+      { "key": "D", "text": "用 Istio VirtualService 配置精确的流量权重 + 基于 header/cookie 的分流" }
+    ],
+    "answer": "D",
+    "explanation": "Istio VirtualService 提供最灵活的流量治理：支持按权重、header、cookie 等多维度精确分流，配合 DestinationRule 定义子集版本。还额外提供熔断、重试、故障注入等能力，更适合复杂灰度场景。ALB Ingress canary 也可行但功能有限；调整副本比例精度差且无法做精确百分比控制。"
+  },
+  {
+    "id": "k8s-003",
+    "category": "K8S",
+    "categoryName": "容器与云原生",
+    "difficulty": 3,
+    "type": "single",
+    "question": "100+ 微服务运行在 ACK 上，需要统一的服务间 mTLS 加密通信且对应用代码零侵入。最佳方案是？",
+    "options": [
+      { "key": "A", "text": "每个服务自行集成 TLS 证书" },
+      { "key": "B", "text": "部署 Service Mesh（ASM/Istio），Sidecar 自动处理 mTLS" },
+      { "key": "C", "text": "使用 Network Policy 限制网络访问" },
+      { "key": "D", "text": "所有服务间通信走 VPN 隧道" }
+    ],
+    "answer": "B",
+    "explanation": "Service Mesh 的 Sidecar 代理自动为所有服务间通信注入 mTLS：自动证书签发/轮转、加密通信、身份认证，对应用完全透明。ASM 是托管的 Istio 服务。Network Policy 只控制网络可达性但不加密；VPN 隧道增加延迟且管理复杂。"
+  },
+  {
+    "id": "k8s-004",
+    "category": "K8S",
+    "categoryName": "容器与云原生",
+    "difficulty": 3,
+    "type": "single",
+    "question": "ACK 集群需要运行有状态 MySQL（开发测试环境），对存储性能要求高。最合适的存储方案是？",
+    "options": [
+      { "key": "A", "text": "使用 NAS 共享存储挂载到 Pod" },
+      { "key": "B", "text": "使用 ESSD 云盘作为 PV（通过 CSI 驱动动态供给）" },
+      { "key": "C", "text": "使用 OSS 作为 PV" },
+      { "key": "D", "text": "使用节点本地存储（hostPath）" }
+    ],
+    "answer": "B",
+    "explanation": "有状态数据库需要高 IOPS 和低延迟的块存储。ESSD 云盘通过 ACK CSI 驱动支持动态 PV 供给（StorageClass），提供高达百万 IOPS。NAS 适合多 Pod 共享读写但延迟高；OSS 是对象存储不适合数据库；hostPath 无法跨节点迁移。"
+  },
+  {
+    "id": "k8s-005",
+    "category": "K8S",
+    "categoryName": "容器与云原生",
+    "difficulty": 3,
+    "type": "single",
+    "question": "ACK 集群多团队共用，需要实现资源隔离：团队 A 最多 100 核 CPU，团队 B 最多 50 核。正确的实现方式是？",
+    "options": [
+      { "key": "A", "text": "为每个团队创建单独的集群" },
+      { "key": "B", "text": "为每个团队创建 Namespace，配置 ResourceQuota 和 LimitRange" },
+      { "key": "C", "text": "通过 Node 亲和性将团队绑定到特定节点" },
+      { "key": "D", "text": "只通过 RBAC 控制权限" }
+    ],
+    "answer": "B",
+    "explanation": "Kubernetes 原生多租户方案：Namespace 做逻辑隔离，ResourceQuota 限制每个 Namespace 的资源总量，LimitRange 限制单个 Pod/Container 的资源范围。配合 RBAC 控制团队只能操作自己的 Namespace。单独集群成本高；Node 亲和性不够灵活；RBAC 不控制资源量。"
+  },
+  {
+    "id": "security-001",
+    "category": "SECURITY",
+    "categoryName": "安全与合规",
+    "difficulty": 3,
+    "type": "single",
+    "question": "公司的 AccessKey 被泄露到 GitHub，应急响应的正确优先级顺序是？",
+    "options": [
+      { "key": "A", "text": "修改密码 → 删除 GitHub 记录 → 通知团队" },
+      { "key": "B", "text": "立即禁用泄露的 AK → 审计 AK 近期操作记录 → 创建新 AK 并更新应用 → 排查泄露原因" },
+      { "key": "C", "text": "删除 GitHub 记录 → 观察是否有异常 → 决定是否换 AK" },
+      { "key": "D", "text": "联系阿里云客服处理" }
+    ],
+    "answer": "B",
+    "explanation": "AK 泄露是 P0 事件：1）立即禁用（止血）；2）审计 ActionTrail 确认是否已被利用；3）创建新 AK 更新到应用中；4）排查泄露原因。仅删除 GitHub 记录无效（已被爬虫抓取）；观察等待会扩大损失。"
+  },
+  {
+    "id": "security-002",
+    "category": "SECURITY",
+    "categoryName": "安全与合规",
+    "difficulty": 3,
+    "type": "single",
+    "question": "管理应用密钥（数据库密码、API Key 等）的最佳实践是？",
+    "options": [
+      { "key": "A", "text": "写在代码的配置文件中" },
+      { "key": "B", "text": "使用 KMS 凭据管家托管密钥，应用通过 SDK 动态获取，支持自动轮转" },
+      { "key": "C", "text": "存在环境变量中" },
+      { "key": "D", "text": "存在 OSS 私有 Bucket 中" }
+    ],
+    "answer": "B",
+    "explanation": "KMS 凭据管家（Secrets Manager）：密钥加密存储、细粒度访问控制（RAM 策略）、操作审计、支持自动轮转。应用通过 SDK/STS 获取，不落盘。代码中硬编码风险最大；环境变量容易在日志中泄露；OSS 无法实现自动轮转。"
+  },
+  {
+    "id": "security-003",
+    "category": "SECURITY",
+    "categoryName": "安全与合规",
+    "difficulty": 3,
+    "type": "single",
+    "question": "某应用遭受 CC 攻击（HTTP Flood），QPS 从 1000 突增到 50万。最有效且对正常用户影响最小的防护方案是？",
+    "options": [
+      { "key": "A", "text": "在安全组封禁所有外部 IP" },
+      { "key": "B", "text": "接入 WAF，配置 CC 防护规则（频率限制 + 人机验证 + IP 信誉库）" },
+      { "key": "C", "text": "升级 ECS 到最高配置" },
+      { "key": "D", "text": "在应用代码中增加限流逻辑" }
+    ],
+    "answer": "B",
+    "explanation": "WAF 前置防御：基于频率检测异常模式、对可疑流量触发人机验证、利用 IP 信誉库过滤恶意 IP。对正常用户影响最小。封禁所有 IP 等于自我 DoS；升配治标不治本；应用层限流在 50 万 QPS 下可能已过载。"
+  },
+  {
+    "id": "troubleshoot-001",
+    "category": "TROUBLESHOOT",
+    "categoryName": "故障排查",
+    "difficulty": 3,
+    "type": "single",
+    "question": "ECS 实例突然无法 SSH 连接，ping 也不通。最正确的排查顺序是？",
+    "options": [
+      { "key": "A", "text": "重启实例 → 检查安全组 → 联系客服" },
+      { "key": "B", "text": "控制台查看实例状态和监控 → 检查安全组规则 → 检查 VPC 路由/ACL → 通过 VNC 查看系统内部" },
+      { "key": "C", "text": "直接释放实例重建" },
+      { "key": "D", "text": "检查本地网络是否正常" }
+    ],
+    "answer": "B",
+    "explanation": "系统性排查：1）控制台确认运行状态和资源监控；2）安全组是否放行 22/ICMP；3）VPC 路由表/网络 ACL 是否有拒绝规则；4）通过 VNC 检查系统内部（iptables/sshd/磁盘满等）。盲目重启可能丢失现场。"
+  },
+  {
+    "id": "troubleshoot-002",
+    "category": "TROUBLESHOOT",
+    "categoryName": "故障排查",
+    "difficulty": 3,
+    "type": "single",
+    "question": "RDS MySQL CPU 从 20% 突然飙升到 95%，业务大量超时。首要排查步骤是？",
+    "options": [
+      { "key": "A", "text": "立即升配到更高规格" },
+      { "key": "B", "text": "通过 DAS 查看慢 SQL 和活跃会话，定位消耗 CPU 最多的 SQL 语句" },
+      { "key": "C", "text": "重启 RDS 实例" },
+      { "key": "D", "text": "开启读写分离" }
+    ],
+    "answer": "B",
+    "explanation": "首要定位根因：DAS 查看活跃会话找到执行时间长的 SQL，分析是否有全表扫描/缺索引/锁等待。常见原因：缺索引大表查询、死锁、低效 SQL。升配只是临时缓解；重启中断业务；读写分离不解决写操作问题。"
+  },
+  {
+    "id": "troubleshoot-003",
+    "category": "TROUBLESHOOT",
+    "categoryName": "故障排查",
+    "difficulty": 3,
+    "type": "single",
+    "question": "微服务通过 SLB 对外提供 HTTPS 服务，用户反馈间歇性 502 Bad Gateway。最全面的排查思路是？",
+    "options": [
+      { "key": "A", "text": "检查 SSL 证书是否过期" },
+      { "key": "B", "text": "SLB 访问日志确认 502 时的后端 → 健康检查状态 → 后端应用日志和连接数 → 确认是服务重启/过载/端口未监听" },
+      { "key": "C", "text": "升级 SLB 带宽" },
+      { "key": "D", "text": "更换 SLB 实例" }
+    ],
+    "answer": "B",
+    "explanation": "502 表示 SLB 无法从后端获取有效响应。排查链路：1）SLB 日志确认落在哪台后端；2）检查健康检查状态；3）查看后端应用日志（OOM/GC 停顿/进程重启）；4）检查连接数是否到上限。间歇性 502 常见：服务重启、GC 停顿、连接池耗尽、keep-alive 超时不一致。"
+  },
+  {
+    "id": "troubleshoot-004",
+    "category": "TROUBLESHOOT",
+    "categoryName": "故障排查",
+    "difficulty": 3,
+    "type": "single",
+    "question": "OSS 静态资源通过 CDN 加速，用户更新文件后仍看到旧内容。原因和解决方案是？",
+    "options": [
+      { "key": "A", "text": "OSS 文件上传失败" },
+      { "key": "B", "text": "CDN 边缘节点缓存未过期——需主动刷新缓存或在文件名中加入内容哈希" },
+      { "key": "C", "text": "用户浏览器 DNS 缓存" },
+      { "key": "D", "text": "OSS Bucket 权限配置错误" }
+    ],
+    "answer": "B",
+    "explanation": "CDN 核心机制是缓存，文件更新后边缘节点仍在 TTL 内返回旧缓存。解决：1）API 刷新 URL/目录；2）最佳实践是在 URL 中加入内容哈希（如 app.abc123.js），URL 变化自然绕过缓存。设置合理的 Cache-Control 也很关键。"
+  },
+  {
+    "id": "essay-001",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "请描述你会如何为一个日均 PV 1000万的电商网站设计阿里云架构？要求高可用（99.95% SLA）、可弹性伸缩、且成本可控。请从计算、存储、数据库、网络、安全五个维度阐述。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考架构要点：\n\n【计算层】ALB + ECS 弹性伸缩组（多 AZ 部署），核心服务容器化（ACK），基线负载用 RI 降本，峰值用按量。\n\n【存储层】OSS 存放静态资源/图片/日志 + CDN 全站加速；ESSD 用于系统盘，生命周期策略归档冷数据。\n\n【数据库层】RDS MySQL 高可用版（三节点或双 AZ）+ 只读实例读写分离 + Redis 缓存热点数据（Session/商品/库存），大促前考虑 PolarDB Serverless 应对弹性。\n\n【网络层】VPC 多 AZ 部署 + NAT 网关 + 安全组最小权限 + WAF 防护 + DDoS 高防。\n\n【安全层】RAM 最小权限 + KMS 凭据管理 + 安全中心（漏洞检测/基线检查）+ ActionTrail 审计 + SSL 证书全站 HTTPS。\n\n【可用性设计】多 AZ 部署消除单点，数据库跨 AZ 容灾，ESS 自动伸缩应对流量波动，CloudMonitor 告警 + 自动化运维。"
+  },
+  {
+    "id": "essay-002",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "你的团队正在将单体 Java 应用拆分为微服务并迁移到 ACK 上。请描述整体迁移策略、拆分原则、以及需要引入的基础设施组件。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【迁移策略】绞杀者模式（Strangler Pattern）：逐步将功能模块拆出为微服务，新功能直接用微服务开发，通过 API 网关统一入口实现新旧共存。\n\n【拆分原则】1）按业务领域拆分（DDD 限界上下文）；2）数据库独立；3）接口契约先行；4）避免过度拆分（团队规模匹配）。\n\n【基础设施组件】容器编排 ACK、服务注册发现 MSE Nacos、API 网关、配置中心、链路追踪 ARMS、日志 SLS + Logtail、CI/CD 云效 + ACR、Service Mesh ASM、分布式事务 Seata。\n\n【注意事项】数据一致性（CAP 取舍）、服务容错（超时/重试/熔断/降级）、分布式 Session（Redis）、统一认证（OAuth2/JWT）。"
+  },
+  {
+    "id": "essay-003",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "某公司在阿里云上有 50+ 账号、数百个 VPC，存在账号管理混乱、网络互通复杂、安全策略不统一的问题。请设计企业级多账号治理方案。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【账号体系】资源目录统一管理，按 OU 划分：安全账号、日志账号、网络账号、生产/开发测试账号。\n\n【网络架构】云企业网 CEN + Transit Router 中心化管控，网络账号集中管理 SharedVPC。\n\n【安全基线】统一 SSO（企业 IdP 对接 RAM SSO），安全账号集中管理安全中心/WAF，日志账号归档 ActionTrail + SLS，SCP 限制子账号行为边界。\n\n【合规审计】Config 合规规则、ActionTrail 操作审计、标签策略强制规范。\n\n【成本管理】统一账单 + 预算告警 + 标签归因。"
+  },
+  {
+    "id": "essay-004",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "设计一个支撑百万级并发连接的 IM（即时通讯）系统，部署在阿里云上。描述核心架构、技术选型和关键挑战的解决思路。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【核心架构】接入层（NLB + 长连接网关 WebSocket/TCP）→ 路由层（Redis Cluster 存用户连接映射）→ 逻辑层（ACK 无状态服务）→ 存储层（Lindorm/TableStore 消息持久化）→ 推送层（路由表定位 + 内部 RPC）。\n\n【关键挑战】1）百万长连接：单机 50万+ TCP（内核调优 + Epoll），水平扩展网关；2）消息可靠投递：落库→ACK→超时重发→离线消息拉取；3）消息顺序：单聊按发送方序号，群聊全局递增 ID；4）群消息：写扩散（大群）vs 读扩散（小群）；5）多端同步：基于 Sequence ID 增量拉取。\n\n【技术选型】网关 Netty/Go，消息队列 RocketMQ，存储 Lindorm + Redis Cluster，搜索 Elasticsearch。"
+  },
+  {
+    "id": "essay-005",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "请阐述「云原生应用」应具备哪些特征？在阿里云上如何通过产品组合实现完整的云原生技术栈？",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【云原生特征】容器化、微服务、声明式 API、不可变基础设施、弹性伸缩、可观测性、韧性设计（容错/熔断/降级）、DevOps/GitOps。\n\n【阿里云技术栈】容器平台 ACK/ACK Serverless、镜像管理 ACR 企业版、Service Mesh ASM、微服务治理 MSE（Nacos/Sentinel/网关）、Serverless FC/SAE、消息队列 RocketMQ/Kafka、可观测性 ARMS + Prometheus + SLS + Grafana、CI/CD 云效、GitOps ArgoCD on ACK、安全（镜像扫描/运行时防护/KMS）。"
+  },
+  {
+    "id": "essay-006",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "线上 MySQL（RDS）单表数据量达到 5 亿行，查询性能严重下降。分析可能原因，并给出从短期到长期的优化方案。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【原因分析】B+ 树层级增加随机 IO 增多，索引体积大 Buffer Pool 命中率下降，大范围扫描/排序产生磁盘临时表，索引碎片化。\n\n【短期（天级）】SQL 优化（加索引/避免 SELECT *）、升配（增大 Buffer Pool + ESSD PL3）、只读实例分流、数据归档。\n\n【中期（周级）】分区表（按时间/ID）、Redis 缓存热点查询、读写分离 + ProxySQL。\n\n【长期（月级）】分库分表（PolarDB-X/ShardingSphere）、冷热分离（近期 MySQL + 历史 Lindorm/AnalyticDB）、OLAP 分析走 AnalyticDB/ClickHouse。"
+  },
+  {
+    "id": "essay-007",
+    "category": "ESSAY",
+    "categoryName": "简答题",
+    "difficulty": 3,
+    "type": "essay",
+    "question": "对比 Serverless 和容器化（K8s）两种技术路线的适用场景和优劣势，说明在什么情况下推荐哪种方案。",
+    "options": [],
+    "answer": "",
+    "explanation": "参考答案要点：\n\n【Serverless 适用】事件驱动、流量波动大/低谷零成本、快速 MVP、胶水逻辑、小团队少运维。\n\n【K8s 适用】长驻服务、延迟敏感（无冷启动）、精细资源控制、复杂微服务治理、有状态服务、团队有 K8s 能力。\n\n【对比】运维成本（Serverless 几乎为零 vs K8s 需集群管理）、冷启动（有 vs 无）、弹性速度（毫秒 vs 秒~分钟）、成本模型（按调用 vs 按节点）、控制力（有限 vs 完全）。\n\n【推荐原则】流量稳定+大团队+复杂架构→K8s；事件驱动+小团队+极致弹性→Serverless；混合架构：核心链路 K8s + 边缘/异步逻辑 Serverless。"
+  }
+]

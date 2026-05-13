@@ -1,0 +1,158 @@
+{
+  "flink": {
+    "url": "https://help.aliyun.com/zh/flink/",
+    "name": "实时计算Flink版"
+  },
+  "ecs": {
+    "url": "https://help.aliyun.com/zh/ecs/",
+    "name": "云服务器ECS"
+  },
+  "ack": {
+    "url": "https://help.aliyun.com/zh/ack/",
+    "name": "容器服务ACK"
+  },
+  "oss": {
+    "url": "https://help.aliyun.com/zh/oss/",
+    "name": "对象存储OSS"
+  },
+  "rds": {
+    "url": "https://help.aliyun.com/zh/rds/",
+    "name": "云数据库RDS"
+  },
+  "redis": {
+    "url": "https://help.aliyun.com/zh/redis/",
+    "name": "云数据库Redis版"
+  },
+  "polardb": {
+    "url": "https://help.aliyun.com/zh/polardb/",
+    "name": "云原生数据库PolarDB"
+  },
+  "slb": {
+    "url": "https://help.aliyun.com/zh/slb/",
+    "name": "负载均衡SLB"
+  },
+  "alb": {
+    "url": "https://help.aliyun.com/zh/alb/",
+    "name": "应用型负载均衡ALB"
+  },
+  "vpc": {
+    "url": "https://help.aliyun.com/zh/vpc/",
+    "name": "专有网络VPC"
+  },
+  "nas": {
+    "url": "https://help.aliyun.com/zh/nas/",
+    "name": "文件存储NAS"
+  },
+  "cdn": {
+    "url": "https://help.aliyun.com/zh/cdn/",
+    "name": "CDN"
+  },
+  "dcdn": {
+    "url": "https://help.aliyun.com/zh/dcdn/",
+    "name": "全站加速DCDN"
+  },
+  "kafka": {
+    "url": "https://help.aliyun.com/zh/kafka/",
+    "name": "消息队列Kafka版"
+  },
+  "rocketmq": {
+    "url": "https://help.aliyun.com/zh/rocketmq/",
+    "name": "消息队列RocketMQ版"
+  },
+  "elasticsearch": {
+    "url": "https://help.aliyun.com/zh/es/",
+    "name": "检索分析服务Elasticsearch版"
+  },
+  "maxcompute": {
+    "url": "https://help.aliyun.com/zh/maxcompute/",
+    "name": "大数据计算服务MaxCompute"
+  },
+  "dataworks": {
+    "url": "https://help.aliyun.com/zh/dataworks/",
+    "name": "DataWorks"
+  },
+  "emr": {
+    "url": "https://help.aliyun.com/zh/emr/",
+    "name": "E-MapReduce"
+  },
+  "fc": {
+    "url": "https://help.aliyun.com/zh/fc/",
+    "name": "函数计算FC"
+  },
+  "sae": {
+    "url": "https://help.aliyun.com/zh/sae/",
+    "name": "Serverless应用引擎SAE"
+  },
+  "arms": {
+    "url": "https://help.aliyun.com/zh/arms/",
+    "name": "应用实时监控服务ARMS"
+  },
+  "sls": {
+    "url": "https://help.aliyun.com/zh/sls/",
+    "name": "日志服务SLS"
+  },
+  "ram": {
+    "url": "https://help.aliyun.com/zh/ram/",
+    "name": "访问控制RAM"
+  },
+  "waf": {
+    "url": "https://help.aliyun.com/zh/waf/",
+    "name": "Web应用防火墙WAF"
+  },
+  "ddos": {
+    "url": "https://help.aliyun.com/zh/ddos-protection/",
+    "name": "DDoS防护"
+  },
+  "mse": {
+    "url": "https://help.aliyun.com/zh/mse/",
+    "name": "微服务引擎MSE"
+  },
+  "apisix": {
+    "url": "https://help.aliyun.com/zh/mse/",
+    "name": "云原生网关"
+  },
+  "lindorm": {
+    "url": "https://help.aliyun.com/zh/lindorm/",
+    "name": "云原生多模数据库Lindorm"
+  },
+  "tablestore": {
+    "url": "https://help.aliyun.com/zh/tablestore/",
+    "name": "表格存储Tablestore"
+  },
+  "hologres": {
+    "url": "https://help.aliyun.com/zh/hologres/",
+    "name": "实时数仓Hologres"
+  },
+  "analyticdb": {
+    "url": "https://help.aliyun.com/zh/analyticdb-for-mysql/",
+    "name": "云原生数据仓库AnalyticDB"
+  },
+  "drds": {
+    "url": "https://help.aliyun.com/zh/polardb-x/",
+    "name": "PolarDB-X"
+  },
+  "dts": {
+    "url": "https://help.aliyun.com/zh/dts/",
+    "name": "数据传输服务DTS"
+  },
+  "datahub": {
+    "url": "https://help.aliyun.com/zh/datahub/",
+    "name": "DataHub"
+  },
+  "actiontrail": {
+    "url": "https://help.aliyun.com/zh/actiontrail/",
+    "name": "操作审计ActionTrail"
+  },
+  "cloudmonitor": {
+    "url": "https://help.aliyun.com/zh/cms/",
+    "name": "云监控"
+  },
+  "terraform": {
+    "url": "https://help.aliyun.com/zh/terraform/",
+    "name": "Terraform"
+  },
+  "eventbridge": {
+    "url": "https://help.aliyun.com/zh/eventbridge/",
+    "name": "事件总线EventBridge"
+  }
+}

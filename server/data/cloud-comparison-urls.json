@@ -1,0 +1,197 @@
+{
+  "oss": {
+    "category": "对象存储",
+    "aliyun": {
+      "name": "对象存储OSS",
+      "doc_url": "https://help.aliyun.com/zh/oss/",
+      "pricing_url": "https://www.aliyun.com/price/product#/oss/detail"
+    },
+    "tencent": {
+      "name": "对象存储COS",
+      "doc_url": "https://cloud.tencent.com/document/product/436",
+      "pricing_url": "https://cloud.tencent.com/document/product/436/6239"
+    }
+  },
+  "ecs": {
+    "category": "云服务器",
+    "aliyun": {
+      "name": "云服务器ECS",
+      "doc_url": "https://help.aliyun.com/zh/ecs/",
+      "pricing_url": "https://www.aliyun.com/price/product#/ecs/detail"
+    },
+    "tencent": {
+      "name": "云服务器CVM",
+      "doc_url": "https://cloud.tencent.com/document/product/213",
+      "pricing_url": "https://cloud.tencent.com/document/product/213/2176"
+    }
+  },
+  "slb": {
+    "category": "负载均衡",
+    "aliyun": {
+      "name": "负载均衡SLB/ALB",
+      "doc_url": "https://help.aliyun.com/zh/slb/",
+      "pricing_url": "https://www.aliyun.com/price/product#/slb/detail"
+    },
+    "tencent": {
+      "name": "负载均衡CLB",
+      "doc_url": "https://cloud.tencent.com/document/product/214",
+      "pricing_url": "https://cloud.tencent.com/document/product/214/42934"
+    }
+  },
+  "cdn": {
+    "category": "内容分发网络",
+    "aliyun": {
+      "name": "CDN",
+      "doc_url": "https://help.aliyun.com/zh/cdn/",
+      "pricing_url": "https://www.aliyun.com/price/product#/cdn/detail"
+    },
+    "tencent": {
+      "name": "内容分发网络CDN",
+      "doc_url": "https://cloud.tencent.com/document/product/228",
+      "pricing_url": "https://cloud.tencent.com/document/product/228/2949"
+    }
+  },
+  "redis": {
+    "category": "云数据库Redis",
+    "aliyun": {
+      "name": "云数据库Redis版",
+      "doc_url": "https://help.aliyun.com/zh/redis/",
+      "pricing_url": "https://www.aliyun.com/price/product#/kvstore/detail"
+    },
+    "tencent": {
+      "name": "云数据库Redis",
+      "doc_url": "https://cloud.tencent.com/document/product/239",
+      "pricing_url": "https://cloud.tencent.com/document/product/239/9894"
+    }
+  },
+  "rds": {
+    "category": "云数据库MySQL",
+    "aliyun": {
+      "name": "云数据库RDS MySQL",
+      "doc_url": "https://help.aliyun.com/zh/rds/",
+      "pricing_url": "https://www.aliyun.com/price/product#/rds/detail"
+    },
+    "tencent": {
+      "name": "云数据库MySQL",
+      "doc_url": "https://cloud.tencent.com/document/product/236",
+      "pricing_url": "https://cloud.tencent.com/document/product/236/18335"
+    }
+  },
+  "vpc": {
+    "category": "专有网络",
+    "aliyun": {
+      "name": "专有网络VPC",
+      "doc_url": "https://help.aliyun.com/zh/vpc/",
+      "pricing_url": "https://www.aliyun.com/price/product#/vpc/detail"
+    },
+    "tencent": {
+      "name": "私有网络VPC",
+      "doc_url": "https://cloud.tencent.com/document/product/215",
+      "pricing_url": "https://cloud.tencent.com/document/product/215/20096"
+    }
+  },
+  "nas": {
+    "category": "文件存储",
+    "aliyun": {
+      "name": "文件存储NAS",
+      "doc_url": "https://help.aliyun.com/zh/nas/",
+      "pricing_url": "https://www.aliyun.com/price/product#/nas/detail"
+    },
+    "tencent": {
+      "name": "文件存储CFS",
+      "doc_url": "https://cloud.tencent.com/document/product/582",
+      "pricing_url": "https://cloud.tencent.com/document/product/582/47378"
+    }
+  },
+  "kafka": {
+    "category": "消息队列Kafka",
+    "aliyun": {
+      "name": "消息队列Kafka版",
+      "doc_url": "https://help.aliyun.com/zh/kafka/",
+      "pricing_url": "https://www.aliyun.com/price/product#/alikafka/detail"
+    },
+    "tencent": {
+      "name": "消息队列CKafka",
+      "doc_url": "https://cloud.tencent.com/document/product/597",
+      "pricing_url": "https://cloud.tencent.com/document/product/597/11745"
+    }
+  },
+  "fc": {
+    "category": "函数计算",
+    "aliyun": {
+      "name": "函数计算FC",
+      "doc_url": "https://help.aliyun.com/zh/fc/",
+      "pricing_url": "https://www.aliyun.com/price/product#/fc/detail"
+    },
+    "tencent": {
+      "name": "云函数SCF",
+      "doc_url": "https://cloud.tencent.com/document/product/583",
+      "pricing_url": "https://cloud.tencent.com/document/product/583/12284"
+    }
+  },
+  "ack": {
+    "category": "容器服务",
+    "aliyun": {
+      "name": "容器服务ACK",
+      "doc_url": "https://help.aliyun.com/zh/ack/",
+      "pricing_url": "https://www.aliyun.com/price/product#/ack/detail"
+    },
+    "tencent": {
+      "name": "容器服务TKE",
+      "doc_url": "https://cloud.tencent.com/document/product/457",
+      "pricing_url": "https://cloud.tencent.com/document/product/457/68803"
+    }
+  },
+  "elasticsearch": {
+    "category": "Elasticsearch",
+    "aliyun": {
+      "name": "检索分析服务Elasticsearch",
+      "doc_url": "https://help.aliyun.com/zh/es/",
+      "pricing_url": "https://www.aliyun.com/price/product#/elasticsearch/detail"
+    },
+    "tencent": {
+      "name": "Elasticsearch Service",
+      "doc_url": "https://cloud.tencent.com/document/product/845",
+      "pricing_url": "https://cloud.tencent.com/document/product/845/18376"
+    }
+  },
+  "sls": {
+    "category": "日志服务",
+    "aliyun": {
+      "name": "日志服务SLS",
+      "doc_url": "https://help.aliyun.com/zh/sls/",
+      "pricing_url": "https://www.aliyun.com/price/product#/sls/detail"
+    },
+    "tencent": {
+      "name": "日志服务CLS",
+      "doc_url": "https://cloud.tencent.com/document/product/614",
+      "pricing_url": "https://cloud.tencent.com/document/product/614/45803"
+    }
+  },
+  "waf": {
+    "category": "Web应用防火墙",
+    "aliyun": {
+      "name": "Web应用防火墙WAF",
+      "doc_url": "https://help.aliyun.com/zh/waf/",
+      "pricing_url": "https://www.aliyun.com/price/product#/waf/detail"
+    },
+    "tencent": {
+      "name": "Web应用防火墙",
+      "doc_url": "https://cloud.tencent.com/document/product/627",
+      "pricing_url": "https://cloud.tencent.com/document/product/627/11730"
+    }
+  },
+  "mongodb": {
+    "category": "云数据库MongoDB",
+    "aliyun": {
+      "name": "云数据库MongoDB版",
+      "doc_url": "https://help.aliyun.com/zh/mongodb/",
+      "pricing_url": "https://www.aliyun.com/price/product#/mongodb/detail"
+    },
+    "tencent": {
+      "name": "云数据库MongoDB",
+      "doc_url": "https://cloud.tencent.com/document/product/240",
+      "pricing_url": "https://cloud.tencent.com/document/product/240/8364"
+    }
+  }
+}
