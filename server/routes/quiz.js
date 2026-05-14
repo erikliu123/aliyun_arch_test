@@ -69,7 +69,13 @@ router.get('/random', (req, res) => {
 
   let pool;
   if (category) {
-    pool = getCategoryMap()[category] || [];
+    const catMap = getCategoryMap();
+    const keys = category.split(',');
+    if (keys.length > 1) {
+      pool = keys.flatMap(k => catMap[k] || []);
+    } else {
+      pool = catMap[category] || [];
+    }
   } else {
     pool = getQuestionBank();
   }

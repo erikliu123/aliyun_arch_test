@@ -1,0 +1,28 @@
+系统架构设计师考纲 — 专业英语
+
+一、考试形式
+- 5道英语阅读理解选择题（每题1分，共5分）
+- 通常是一篇技术文章，设置5个填空或理解题
+- 涉及IT领域专业词汇和概念
+
+二、常考技术词汇领域
+- 软件工程：requirement, specification, prototype, iteration, agile, refactoring
+- 架构设计：architecture, component, module, scalability, availability, fault-tolerance
+- 数据库：transaction, concurrency, normalization, index, schema, integrity
+- 网络：protocol, bandwidth, latency, firewall, encryption, authentication
+- 云计算：virtualization, containerization, microservice, serverless, elasticity
+- 安全：vulnerability, exploit, patch, cipher, certificate, authorization
+
+三、常见技术概念英文表述
+- Service-Oriented Architecture (SOA)
+- Model-View-Controller (MVC)
+- Representational State Transfer (REST)
+- Continuous Integration/Continuous Deployment (CI/CD)
+- Domain-Driven Design (DDD)
+- Test-Driven Development (TDD)
+
+四、阅读技巧
+- 理解上下文推断词义
+- 技术文档结构：Abstract→Introduction→Body→Conclusion
+- 因果关系词：therefore, consequently, due to, as a result
+- 对比关系词：however, whereas, in contrast, on the other hand

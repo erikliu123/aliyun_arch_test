@@ -49,6 +49,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/ruankao',
+    name: 'Ruankao',
+    component: () => import('../views/Ruankao.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/qq-callback',
     name: 'QQCallback',
     component: () => import('../views/QQCallback.vue')

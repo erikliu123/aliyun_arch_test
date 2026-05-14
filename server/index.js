@@ -15,6 +15,15 @@ async function start() {
   const questionsPath = path.join(__dirname, 'data', 'questions.json');
   const questionBank = JSON.parse(fs.readFileSync(questionsPath, 'utf-8'));
 
+  // 加载软考题库
+  const ruankaoPath = path.join(__dirname, 'data', 'ruankao-questions.json');
+  let ruankaoCount = 0;
+  if (fs.existsSync(ruankaoPath)) {
+    const ruankaoQuestions = JSON.parse(fs.readFileSync(ruankaoPath, 'utf-8'));
+    questionBank.push(...ruankaoQuestions);
+    ruankaoCount = ruankaoQuestions.length;
+  }
+
   const questionMap = {};
   const categoryMap = {};
   for (const q of questionBank) {
@@ -60,7 +69,7 @@ async function start() {
   global.questionMap = questionMap;
   global.categoryMap = categoryMap;
 
-  console.log(`题库加载完成: ${questionBank.length} 道题 (静态 ${questionBank.length - genCount}, 动态 ${genCount}), ${Object.keys(categoryMap).length} 个分类`);
+  console.log(`题库加载完成: ${questionBank.length} 道题 (阿里云 ${questionBank.length - genCount - ruankaoCount}, 软考 ${ruankaoCount}, 动态 ${genCount}), ${Object.keys(categoryMap).length} 个分类`);
 
   // 创建 Express 应用
   const app = express();

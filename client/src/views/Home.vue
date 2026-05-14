@@ -60,7 +60,15 @@
       <span class="mode-icon">&#9878;</span>
       <div>
         <span class="mode-name">云产品对比</span>
-        <span class="mode-desc">阿里云 vs 腾讯云 定价/功能/生态对比</span>
+        <span class="mode-desc">阿里云 vs 腾讯云 vs 火山引擎 对比</span>
+      </div>
+    </button>
+
+    <button class="card mode-card-wide ruankao-card" @click="router.push('/ruankao')">
+      <span class="mode-icon">&#9997;</span>
+      <div>
+        <span class="mode-name">软考高级架构师</span>
+        <span class="mode-desc">系统架构设计师专项练习</span>
       </div>
     </button>
 
@@ -272,6 +280,16 @@ function handleLogout() {
 
 .compare-card .mode-name {
   color: #1976d2;
+}
+
+.ruankao-card {
+  margin-top: 12px;
+  border: 1.5px solid #e65100;
+  background: #fff8f0;
+}
+
+.ruankao-card .mode-name {
+  color: #e65100;
 }
 
 .mode-icon {
