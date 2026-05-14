@@ -47,6 +47,11 @@ const routes = [
     name: 'Compare',
     component: () => import('../views/Compare.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/qq-callback',
+    name: 'QQCallback',
+    component: () => import('../views/QQCallback.vue')
   }
 ]
 

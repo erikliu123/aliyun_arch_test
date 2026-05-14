@@ -17,7 +17,7 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const showNav = computed(() => {
-  const hideNavRoutes = ['Login', 'Quiz']
+  const hideNavRoutes = ['Login', 'Quiz', 'QQCallback']
   return userStore.isLoggedIn && !hideNavRoutes.includes(route.name)
 })
 </script>

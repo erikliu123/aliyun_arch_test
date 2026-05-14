@@ -88,8 +88,10 @@ async function start() {
   const generateRoutes = require('./routes/generate');
   const feedbackRoutes = require('./routes/feedback');
   const compareRoutes = require('./routes/compare');
+  const authQqRoutes = require('./routes/auth-qq');
 
   app.use('/api', userRoutes);
+  app.use('/api/auth/qq', authQqRoutes);
   app.use('/api/questions', authMiddleware, quizRoutes);
   app.use('/api/answers', authMiddleware, quizRoutes);
   app.use('/api/stats', authMiddleware, statsRoutes);

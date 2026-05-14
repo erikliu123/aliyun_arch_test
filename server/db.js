@@ -23,9 +23,23 @@ async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      qq_openid TEXT UNIQUE,
+      qq_nickname TEXT,
+      qq_avatar TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     )
   `);
+
+  // 兼容旧表：自动添加 QQ 字段
+  try {
+    db.run(`ALTER TABLE users ADD COLUMN qq_openid TEXT UNIQUE`);
+  } catch (e) { /* 列已存在则忽略 */ }
+  try {
+    db.run(`ALTER TABLE users ADD COLUMN qq_nickname TEXT`);
+  } catch (e) { /* 列已存在则忽略 */ }
+  try {
+    db.run(`ALTER TABLE users ADD COLUMN qq_avatar TEXT`);
+  } catch (e) { /* 列已存在则忽略 */ }
 
   db.run(`
     CREATE TABLE IF NOT EXISTS answer_records (
