@@ -109,6 +109,10 @@ async function start() {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`服务器启动: http://localhost:${PORT}`);
+
+    // 启动数据库定时备份
+    const { startBackupScheduler } = require('./backup');
+    startBackupScheduler();
   });
 }
 

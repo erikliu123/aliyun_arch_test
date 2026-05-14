@@ -1,41 +1,50 @@
 const express = require('express');
+const router = express.Router();
 const { getDb, saveDb } = require('../db');
 const { scrapeForComparison, getComparisonProductList } = require('../services/compare-scraper');
 const { generateComparisonReport } = require('../services/dashscope');
 
-const router = express.Router();
-
-// 限流
-const rateLimitMap = new Map();
-const RATE_LIMIT = 5;
-const RATE_WINDOW = 60 * 60 * 1000;
+// 速率限制：每用户每小时5次
+const rateLimits = {};
 
 function checkRateLimit(userId) {
   const now = Date.now();
-  const calls = rateLimitMap.get(userId) || [];
-  const recent = calls.filter(t => now - t < RATE_WINDOW);
-  rateLimitMap.set(userId, recent);
-  if (recent.length >= RATE_LIMIT) return false;
-  recent.push(now);
+  const key = `compare_${userId}`;
+  if (!rateLimits[key]) {
+    rateLimits[key] = [];
+  }
+  rateLimits[key] = rateLimits[key].filter(t => now - t < 3600000);
+  if (rateLimits[key].length >= 5) {
+    return false;
+  }
+  rateLimits[key].push(now);
   return true;
 }
 
-// 获取可对比的产品列表
+/**
+ * GET /api/compare/products - 获取可对比的产品列表
+ */
 router.get('/products', (req, res) => {
-  const products = getComparisonProductList();
-  res.json({ products });
+  try {
+    const products = getComparisonProductList();
+    res.json({ products });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// 生成对比报告
+/**
+ * POST /api/compare/generate - 生成对比报告
+ */
 router.post('/generate', async (req, res) => {
-  const { productKey } = req.body;
   const userId = req.userId;
+  const { productKey } = req.body;
 
   if (!productKey) {
     return res.status(400).json({ error: '请选择要对比的产品' });
   }
 
-  // 检查缓存（7天内的报告直接返回）
+  // 检查缓存（7天内）
   const db = getDb();
   const cached = db.exec(`
     SELECT report_json, created_at FROM comparison_reports
@@ -44,59 +53,85 @@ router.post('/generate', async (req, res) => {
   `, [productKey]);
 
   if (cached.length > 0 && cached[0].values.length > 0) {
-    const report = JSON.parse(cached[0].values[0][0]);
-    return res.json({ report, cached: true, generatedAt: cached[0].values[0][1] });
+    const row = cached[0].values[0];
+    try {
+      const report = JSON.parse(row[0]);
+      return res.json({
+        report,
+        cached: true,
+        generated_at: row[1]
+      });
+    } catch (e) {
+      // 缓存数据损坏，重新生成
+    }
   }
 
-  // 限流
+  // 速率限制
   if (!checkRateLimit(userId)) {
-    return res.status(429).json({ error: '生成频率过高，请稍后再试（每小时最多5次）' });
+    return res.status(429).json({ error: '生成频率超限，每小时最多 5 次，请稍后再试' });
   }
 
   try {
-    // 1. 爬取双方页面
+    // 1. 爬取双云文档
     const scrapeResult = await scrapeForComparison(productKey);
 
-    // 2. 调用 LLM 生成对比报告
+    // 2. 调用大模型生成报告
     const report = await generateComparisonReport(scrapeResult);
 
-    // 3. 保存到数据库（7天缓存）
+    // 3. 存入数据库缓存
+    const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
     db.run(`
       INSERT INTO comparison_reports (product_key, report_json, aliyun_source_url, tencent_source_url, created_by, expires_at)
-      VALUES (?, ?, ?, ?, ?, datetime('now', '+7 days'))
+      VALUES (?, ?, ?, ?, ?, ?)
     `, [
       productKey,
       JSON.stringify(report),
-      scrapeResult.aliyun.docUrl,
-      scrapeResult.tencent.docUrl,
-      userId
+      scrapeResult.aliyun.docUrl || '',
+      scrapeResult.tencent.docUrl || '',
+      userId,
+      expiresAt
     ]);
     saveDb();
 
-    res.json({ report, cached: false, generatedAt: new Date().toISOString() });
-  } catch (err) {
-    console.error('对比报告生成失败:', err.message);
-    res.status(500).json({ error: err.message });
+    res.json({
+      report,
+      cached: false,
+      generated_at: new Date().toISOString(),
+      scrape_errors: [
+        ...scrapeResult.aliyun.errors,
+        ...scrapeResult.tencent.errors
+      ]
+    });
+  } catch (e) {
+    console.error('对比报告生成失败:', e.message);
+    res.status(500).json({ error: e.message || '对比报告生成失败，请稍后重试' });
   }
 });
 
-// 获取缓存的报告
+/**
+ * GET /api/compare/report/:productKey - 获取缓存的对比报告
+ */
 router.get('/report/:productKey', (req, res) => {
   const { productKey } = req.params;
   const db = getDb();
 
   const result = db.exec(`
     SELECT report_json, created_at FROM comparison_reports
-    WHERE product_key = ? AND expires_at > datetime('now')
+    WHERE product_key = ?
     ORDER BY created_at DESC LIMIT 1
   `, [productKey]);
 
-  if (result.length > 0 && result[0].values.length > 0) {
-    const report = JSON.parse(result[0].values[0][0]);
-    return res.json({ report, generatedAt: result[0].values[0][1] });
+  if (result.length === 0 || result[0].values.length === 0) {
+    return res.status(404).json({ error: '暂无该产品的对比报告' });
   }
 
-  res.status(404).json({ error: '暂无该产品的对比报告' });
+  const row = result[0].values[0];
+  try {
+    const report = JSON.parse(row[0]);
+    res.json({ report, generated_at: row[1] });
+  } catch (e) {
+    res.status(500).json({ error: '报告数据解析失败' });
+  }
 });
 
 module.exports = router;

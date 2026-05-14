@@ -37,12 +37,14 @@
 
       <!-- 题型选择 -->
       <div class="section">
-        <label class="label">题目类型</label>
-        <div class="checkbox-group">
-          <label class="checkbox-item" v-for="t in typeOptions" :key="t.value">
-            <input type="checkbox" :value="t.value" v-model="selectedTypes" />
-            <span>{{ t.label }}</span>
-          </label>
+        <label class="label">题目类型 <span class="hint">(可多选)</span></label>
+        <div class="radio-group">
+          <button
+            v-for="t in typeOptions"
+            :key="t.value"
+            :class="['radio-btn', selectedTypes.includes(t.value) && 'active']"
+            @click="toggleType(t.value)"
+          >{{ t.label }}</button>
         </div>
       </div>
 
@@ -199,7 +201,7 @@ async function handleGenerate() {
       body.productName = ''
     }
 
-    const data = await api.post('/generate', body)
+    const data = await api.post('/generate', body, { timeout: 90000 })
     result.value = data
 
     // 刷新历史
@@ -212,6 +214,16 @@ async function handleGenerate() {
   }
 }
 
+function toggleType(val) {
+  const idx = selectedTypes.value.indexOf(val)
+  if (idx >= 0) {
+    if (selectedTypes.value.length > 1) {
+      selectedTypes.value.splice(idx, 1)
+    }
+  } else {
+    selectedTypes.value.push(val)
+  }
+}
 function startQuiz() {
   if (result.value) {
     router.push({

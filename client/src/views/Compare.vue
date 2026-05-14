@@ -223,7 +223,7 @@ function verdictClass(verdict) {
 function formatTime(isoStr) {
   if (!isoStr) return ''
   const d = new Date(isoStr)
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 </script>
 
@@ -293,6 +293,7 @@ function formatTime(isoStr) {
   vertical-align: middle;
 }
 
+/* Loading */
 .loading-section {
   text-align: center;
   padding: 60px 20px;
@@ -324,6 +325,7 @@ function formatTime(isoStr) {
   color: var(--text-hint);
 }
 
+/* Report */
 .report-section {
   animation: fadeIn 0.3s ease;
 }
@@ -385,6 +387,7 @@ function formatTime(isoStr) {
   color: var(--text-hint);
 }
 
+/* Tabs */
 .tab-row {
   display: flex;
   gap: 0;
@@ -411,6 +414,7 @@ function formatTime(isoStr) {
   font-weight: 600;
 }
 
+/* Compare Table */
 .compare-table {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -473,6 +477,7 @@ function formatTime(isoStr) {
   line-height: 1.5;
 }
 
+/* SLA */
 .sla-block {
   margin-bottom: 16px;
 }
@@ -517,6 +522,7 @@ function formatTime(isoStr) {
   font-weight: 600;
 }
 
+/* Recommendation */
 .recommendation-block {
   margin-top: 20px;
   padding: 14px 16px;
@@ -537,6 +543,7 @@ function formatTime(isoStr) {
   line-height: 1.6;
 }
 
+/* Error */
 .error-block {
   text-align: center;
   padding: 30px 20px;
