@@ -10,6 +10,11 @@
       "name": "对象存储COS",
       "doc_url": "https://cloud.tencent.com/document/product/436",
       "pricing_url": "https://cloud.tencent.com/document/product/436/6239"
+    },
+    "volcengine": {
+      "name": "对象存储TOS",
+      "doc_url": "https://www.volcengine.com/docs/6349",
+      "pricing_url": "https://www.volcengine.com/docs/6349/107844"
     }
   },
   "ecs": {
@@ -23,6 +28,11 @@
       "name": "云服务器CVM",
       "doc_url": "https://cloud.tencent.com/document/product/213",
       "pricing_url": "https://cloud.tencent.com/document/product/213/2176"
+    },
+    "volcengine": {
+      "name": "云服务器ECS",
+      "doc_url": "https://www.volcengine.com/docs/6396",
+      "pricing_url": "https://www.volcengine.com/docs/6396/70498"
     }
   },
   "slb": {
@@ -36,6 +46,11 @@
       "name": "负载均衡CLB",
       "doc_url": "https://cloud.tencent.com/document/product/214",
       "pricing_url": "https://cloud.tencent.com/document/product/214/42934"
+    },
+    "volcengine": {
+      "name": "负载均衡CLB",
+      "doc_url": "https://www.volcengine.com/docs/6406",
+      "pricing_url": "https://www.volcengine.com/docs/6406/68063"
     }
   },
   "cdn": {
@@ -49,6 +64,11 @@
       "name": "内容分发网络CDN",
       "doc_url": "https://cloud.tencent.com/document/product/228",
       "pricing_url": "https://cloud.tencent.com/document/product/228/2949"
+    },
+    "volcengine": {
+      "name": "内容分发网络CDN",
+      "doc_url": "https://www.volcengine.com/docs/6454",
+      "pricing_url": "https://www.volcengine.com/docs/6454/70495"
     }
   },
   "redis": {
@@ -62,6 +82,11 @@
       "name": "云数据库Redis",
       "doc_url": "https://cloud.tencent.com/document/product/239",
       "pricing_url": "https://cloud.tencent.com/document/product/239/9894"
+    },
+    "volcengine": {
+      "name": "缓存数据库Redis版",
+      "doc_url": "https://www.volcengine.com/docs/6293",
+      "pricing_url": "https://www.volcengine.com/docs/6293/79498"
     }
   },
   "rds": {
@@ -75,6 +100,11 @@
       "name": "云数据库MySQL",
       "doc_url": "https://cloud.tencent.com/document/product/236",
       "pricing_url": "https://cloud.tencent.com/document/product/236/18335"
+    },
+    "volcengine": {
+      "name": "云数据库MySQL版",
+      "doc_url": "https://www.volcengine.com/docs/6313",
+      "pricing_url": "https://www.volcengine.com/docs/6313/97425"
     }
   },
   "vpc": {
@@ -88,6 +118,11 @@
       "name": "私有网络VPC",
       "doc_url": "https://cloud.tencent.com/document/product/215",
       "pricing_url": "https://cloud.tencent.com/document/product/215/20096"
+    },
+    "volcengine": {
+      "name": "私有网络VPC",
+      "doc_url": "https://www.volcengine.com/docs/6393",
+      "pricing_url": "https://www.volcengine.com/docs/6393/68498"
     }
   },
   "nas": {
@@ -101,6 +136,11 @@
       "name": "文件存储CFS",
       "doc_url": "https://cloud.tencent.com/document/product/582",
       "pricing_url": "https://cloud.tencent.com/document/product/582/47378"
+    },
+    "volcengine": {
+      "name": "文件存储NAS",
+      "doc_url": "https://www.volcengine.com/docs/6614",
+      "pricing_url": "https://www.volcengine.com/docs/6614/67648"
     }
   },
   "kafka": {
@@ -114,6 +154,11 @@
       "name": "消息队列CKafka",
       "doc_url": "https://cloud.tencent.com/document/product/597",
       "pricing_url": "https://cloud.tencent.com/document/product/597/11745"
+    },
+    "volcengine": {
+      "name": "消息队列Kafka版",
+      "doc_url": "https://www.volcengine.com/docs/6410",
+      "pricing_url": "https://www.volcengine.com/docs/6410/68090"
     }
   },
   "fc": {
@@ -127,6 +172,11 @@
       "name": "云函数SCF",
       "doc_url": "https://cloud.tencent.com/document/product/583",
       "pricing_url": "https://cloud.tencent.com/document/product/583/12284"
+    },
+    "volcengine": {
+      "name": "函数服务veFaaS",
+      "doc_url": "https://www.volcengine.com/docs/6662",
+      "pricing_url": "https://www.volcengine.com/docs/6662/107507"
     }
   },
   "ack": {
@@ -140,6 +190,11 @@
       "name": "容器服务TKE",
       "doc_url": "https://cloud.tencent.com/document/product/457",
       "pricing_url": "https://cloud.tencent.com/document/product/457/68803"
+    },
+    "volcengine": {
+      "name": "容器服务VKE",
+      "doc_url": "https://www.volcengine.com/docs/6460",
+      "pricing_url": "https://www.volcengine.com/docs/6460/74891"
     }
   },
   "elasticsearch": {
@@ -153,6 +208,11 @@
       "name": "Elasticsearch Service",
       "doc_url": "https://cloud.tencent.com/document/product/845",
       "pricing_url": "https://cloud.tencent.com/document/product/845/18376"
+    },
+    "volcengine": {
+      "name": "Elasticsearch Service",
+      "doc_url": "https://www.volcengine.com/docs/6571",
+      "pricing_url": "https://www.volcengine.com/docs/6571/131025"
     }
   },
   "sls": {
@@ -166,6 +226,11 @@
       "name": "日志服务CLS",
       "doc_url": "https://cloud.tencent.com/document/product/614",
       "pricing_url": "https://cloud.tencent.com/document/product/614/45803"
+    },
+    "volcengine": {
+      "name": "日志服务TLS",
+      "doc_url": "https://www.volcengine.com/docs/6470",
+      "pricing_url": "https://www.volcengine.com/docs/6470/69627"
     }
   },
   "waf": {
@@ -179,6 +244,11 @@
       "name": "Web应用防火墙",
       "doc_url": "https://cloud.tencent.com/document/product/627",
       "pricing_url": "https://cloud.tencent.com/document/product/627/11730"
+    },
+    "volcengine": {
+      "name": "Web应用防火墙WAF",
+      "doc_url": "https://www.volcengine.com/docs/6627",
+      "pricing_url": "https://www.volcengine.com/docs/6627/116646"
     }
   },
   "mongodb": {
@@ -192,6 +262,11 @@
       "name": "云数据库MongoDB",
       "doc_url": "https://cloud.tencent.com/document/product/240",
       "pricing_url": "https://cloud.tencent.com/document/product/240/8364"
+    },
+    "volcengine": {
+      "name": "文档数据库MongoDB版",
+      "doc_url": "https://www.volcengine.com/docs/6447",
+      "pricing_url": "https://www.volcengine.com/docs/6447/78571"
     }
   }
 }

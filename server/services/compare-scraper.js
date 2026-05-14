@@ -2,7 +2,7 @@ const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
 
-// 加载双云产品映射
+// 加载云产品映射
 const mappingPath = path.join(__dirname, '..', 'data', 'cloud-comparison-urls.json');
 const comparisonMapping = JSON.parse(fs.readFileSync(mappingPath, 'utf-8'));
 
@@ -14,7 +14,8 @@ function getComparisonProductList() {
     key,
     category: val.category,
     aliyunName: val.aliyun.name,
-    tencentName: val.tencent.name
+    tencentName: val.tencent.name,
+    volcengineName: val.volcengine.name
   }));
 }
 
@@ -125,7 +126,41 @@ function extractTencentContent(html) {
 }
 
 /**
- * 爬取双云产品的文档和定价页面
+ * 从火山引擎页面提取内容
+ */
+function extractVolcengineContent(html) {
+  const $ = cheerio.load(html);
+  $('script, style, nav, footer, header, .sidebar, .doc-menu, .toc, .breadcrumb, [class*="nav"]').remove();
+
+  const selectors = [
+    '.doc-content-container',
+    '.markdown-body',
+    '.article-content',
+    '.doc-content',
+    '[class*="markdown"]',
+    '[class*="content"]',
+    'article',
+    'main'
+  ];
+
+  let content = '';
+  for (const sel of selectors) {
+    const el = $(sel);
+    if (el.length > 0) {
+      content = el.first().text();
+      if (content.trim().length > 200) break;
+    }
+  }
+
+  if (content.trim().length < 200) {
+    content = $('body').text();
+  }
+
+  return content.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * 爬取三方云产品的文档和定价页面
  */
 async function scrapeForComparison(productKey) {
   const mapping = getProductMapping(productKey);
@@ -135,12 +170,14 @@ async function scrapeForComparison(productKey) {
 
   const maxLen = 4000;
 
-  // 并行爬取4个页面
-  const [aliyunDoc, aliyunPricing, tencentDoc, tencentPricing] = await Promise.all([
+  // 并行爬取6个页面
+  const [aliyunDoc, aliyunPricing, tencentDoc, tencentPricing, volcengineDoc, volcenginePricing] = await Promise.all([
     fetchPage(mapping.aliyun.doc_url),
     fetchPage(mapping.aliyun.pricing_url),
     fetchPage(mapping.tencent.doc_url),
-    fetchPage(mapping.tencent.pricing_url)
+    fetchPage(mapping.tencent.pricing_url),
+    fetchPage(mapping.volcengine.doc_url),
+    fetchPage(mapping.volcengine.pricing_url)
   ]);
 
   const result = {
@@ -159,6 +196,13 @@ async function scrapeForComparison(productKey) {
       pricingContent: tencentPricing.success ? extractTencentContent(tencentPricing.content).substring(0, maxLen) : '',
       docUrl: mapping.tencent.doc_url,
       errors: []
+    },
+    volcengine: {
+      name: mapping.volcengine.name,
+      docContent: volcengineDoc.success ? extractVolcengineContent(volcengineDoc.content).substring(0, maxLen) : '',
+      pricingContent: volcenginePricing.success ? extractVolcengineContent(volcenginePricing.content).substring(0, maxLen) : '',
+      docUrl: mapping.volcengine.doc_url,
+      errors: []
     }
   };
 
@@ -166,13 +210,16 @@ async function scrapeForComparison(productKey) {
   if (!aliyunPricing.success) result.aliyun.errors.push(`定价页抓取失败: ${aliyunPricing.error}`);
   if (!tencentDoc.success) result.tencent.errors.push(`文档页抓取失败: ${tencentDoc.error}`);
   if (!tencentPricing.success) result.tencent.errors.push(`定价页抓取失败: ${tencentPricing.error}`);
+  if (!volcengineDoc.success) result.volcengine.errors.push(`文档页抓取失败: ${volcengineDoc.error}`);
+  if (!volcenginePricing.success) result.volcengine.errors.push(`定价页抓取失败: ${volcenginePricing.error}`);
 
-  // 至少需要一方的文档内容
+  // 至少需要两方有内容
   const totalContent = (result.aliyun.docContent + result.aliyun.pricingContent +
-    result.tencent.docContent + result.tencent.pricingContent).length;
+    result.tencent.docContent + result.tencent.pricingContent +
+    result.volcengine.docContent + result.volcengine.pricingContent).length;
 
   if (totalContent < 200) {
-    throw new Error('双方文档内容抓取量过少，无法生成有效对比报告');
+    throw new Error('三方文档内容抓取量过少，无法生成有效对比报告');
   }
 
   return result;

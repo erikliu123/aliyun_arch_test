@@ -228,43 +228,45 @@ function validateQuestions(questions, allowedTypes) {
 async function generateComparisonReport(scrapeResult) {
   const apiKey = getApiKey();
 
-  const systemPrompt = `你是一位资深云计算分析师，擅长对比分析不同云厂商的产品。你的任务是根据提供的文档和定价信息，生成客观、专业的结构化对比报告。
+  const systemPrompt = `你是一位资深云计算分析师，擅长对比分析不同云厂商的产品。你的任务是根据提供的文档和定价信息，生成客观、专业的三方结构化对比报告（阿里云、腾讯云、火山引擎）。
 
 要求：
 1. 基于提供的文档内容进行对比，同时可以结合你的专业知识补充
 2. 定价对比尽量给出具体数字（如有），并注明计费模式
 3. 功能对比要覆盖核心差异点，每项给出简明结论
 4. 保持客观中立，不偏向任何一方
-5. 输出必须是严格的JSON格式
+5. 如果某一方文档信息不足，可结合你的知识进行补充，但需标注
+6. 输出必须是严格的JSON格式
 
 输出JSON Schema：
 {
-  "summary": "一句话总结两家产品的核心差异",
+  "summary": "一句话总结三家产品的核心差异",
   "pricing": {
     "dimensions": [
-      { "name": "计费维度名称", "aliyun": "阿里云价格/模式", "tencent": "腾讯云价格/模式", "verdict": "结论(阿里云优/腾讯云优/相当)" }
+      { "name": "计费维度名称", "aliyun": "阿里云价格/模式", "tencent": "腾讯云价格/模式", "volcengine": "火山引擎价格/模式", "verdict": "结论" }
     ],
     "notes": "定价补充说明"
   },
   "features": {
     "items": [
-      { "feature": "功能点", "aliyun": "阿里云支持情况", "tencent": "腾讯云支持情况", "verdict": "结论" }
+      { "feature": "功能点", "aliyun": "阿里云支持情况", "tencent": "腾讯云支持情况", "volcengine": "火山引擎支持情况", "verdict": "结论" }
     ]
   },
   "sla_ecosystem": {
-    "sla": { "aliyun": "阿里云SLA", "tencent": "腾讯云SLA" },
+    "sla": { "aliyun": "阿里云SLA", "tencent": "腾讯云SLA", "volcengine": "火山引擎SLA" },
     "ecosystem": [
-      { "aspect": "生态维度", "aliyun": "阿里云情况", "tencent": "腾讯云情况", "verdict": "结论" }
+      { "aspect": "生态维度", "aliyun": "阿里云情况", "tencent": "腾讯云情况", "volcengine": "火山引擎情况", "verdict": "结论" }
     ]
   },
   "recommendation": "综合建议：适合什么场景选哪家"
 }`;
 
-  let userContent = `请对比以下两家云厂商的同类产品，生成结构化对比报告。
+  let userContent = `请对比以下三家云厂商的同类产品，生成结构化对比报告。
 
 产品类别：${scrapeResult.category}
 阿里云产品：${scrapeResult.aliyun.name}
 腾讯云产品：${scrapeResult.tencent.name}
+火山引擎产品：${scrapeResult.volcengine.name}
 
 `;
 
@@ -280,12 +282,18 @@ async function generateComparisonReport(scrapeResult) {
   if (scrapeResult.tencent.pricingContent) {
     userContent += `===腾讯云定价信息===\n${scrapeResult.tencent.pricingContent}\n\n`;
   }
+  if (scrapeResult.volcengine.docContent) {
+    userContent += `===火山引擎产品文档===\n${scrapeResult.volcengine.docContent}\n\n`;
+  }
+  if (scrapeResult.volcengine.pricingContent) {
+    userContent += `===火山引擎定价信息===\n${scrapeResult.volcengine.pricingContent}\n\n`;
+  }
 
   userContent += `请直接输出JSON对比报告，不要添加任何额外说明文字。要求：
 - pricing.dimensions 至少5个维度
 - features.items 至少6个功能点
 - sla_ecosystem.ecosystem 至少3个维度
-- verdict 只能是"阿里云优"、"腾讯云优"或"相当"三选一`;
+- verdict 为简短结论，如"阿里云优"、"腾讯云优"、"火山引擎优"、"三方相当"等`;
 
   const requestBody = {
     model: 'qwen-plus',
@@ -294,11 +302,11 @@ async function generateComparisonReport(scrapeResult) {
       { role: 'user', content: userContent }
     ],
     temperature: 0.3,
-    max_tokens: 8192
+    max_tokens: 12000
   };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 90000);
+  const timer = setTimeout(() => controller.abort(), 120000);
 
   try {
     const response = await fetch(API_URL, {

@@ -113,12 +113,21 @@ async function initDb() {
       report_json TEXT NOT NULL,
       aliyun_source_url TEXT,
       tencent_source_url TEXT,
+      volcengine_source_url TEXT,
       created_by INTEGER NOT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       expires_at TEXT
     )
   `);
   db.run(`CREATE INDEX IF NOT EXISTS idx_compare_product ON comparison_reports(product_key)`);
+
+  // 兼容旧表：添加火山引擎字段
+  try {
+    db.run(`ALTER TABLE comparison_reports ADD COLUMN volcengine_source_url TEXT`);
+  } catch (e) { /* 列已存在则忽略 */ }
+
+  // 过期不含火山引擎数据的旧报告
+  db.run(`UPDATE comparison_reports SET expires_at = datetime('now') WHERE report_json NOT LIKE '%volcengine%'`);
 
   saveDb();
   return db;

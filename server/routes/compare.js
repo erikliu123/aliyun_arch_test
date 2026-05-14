@@ -81,13 +81,14 @@ router.post('/generate', async (req, res) => {
     // 3. 存入数据库缓存
     const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
     db.run(`
-      INSERT INTO comparison_reports (product_key, report_json, aliyun_source_url, tencent_source_url, created_by, expires_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO comparison_reports (product_key, report_json, aliyun_source_url, tencent_source_url, volcengine_source_url, created_by, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `, [
       productKey,
       JSON.stringify(report),
       scrapeResult.aliyun.docUrl || '',
       scrapeResult.tencent.docUrl || '',
+      scrapeResult.volcengine.docUrl || '',
       userId,
       expiresAt
     ]);
@@ -99,7 +100,8 @@ router.post('/generate', async (req, res) => {
       generated_at: new Date().toISOString(),
       scrape_errors: [
         ...scrapeResult.aliyun.errors,
-        ...scrapeResult.tencent.errors
+        ...scrapeResult.tencent.errors,
+        ...scrapeResult.volcengine.errors
       ]
     });
   } catch (e) {

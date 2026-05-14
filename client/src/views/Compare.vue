@@ -1,7 +1,7 @@
 <template>
   <div class="page compare-page">
     <h2 class="page-title">云产品对比</h2>
-    <p class="page-desc">选择产品，自动对比阿里云 vs 腾讯云的定价、功能和生态</p>
+    <p class="page-desc">选择产品，自动对比阿里云 vs 腾讯云 vs 火山引擎</p>
 
     <!-- 产品选择 -->
     <div v-if="!report && !loading" class="product-grid">
@@ -12,7 +12,7 @@
         @click="selectProduct(p)"
       >
         <span class="product-category">{{ p.category }}</span>
-        <span class="product-vs">{{ p.aliyunName }} <span class="vs-tag">VS</span> {{ p.tencentName }}</span>
+        <span class="product-vs">{{ p.aliyunName }} <span class="vs-tag">VS</span> {{ p.tencentName }} <span class="vs-tag">VS</span> {{ p.volcengineName }}</span>
       </button>
     </div>
 
@@ -20,14 +20,14 @@
     <div v-if="loading" class="loading-section">
       <div class="loading-spinner"></div>
       <p class="loading-text">{{ loadingText }}</p>
-      <p class="loading-hint">首次生成需要 30-60 秒，请耐心等待</p>
+      <p class="loading-hint">首次生成需要 60-90 秒，请耐心等待</p>
     </div>
 
     <!-- 报告展示 -->
     <div v-if="report && !loading" class="report-section">
       <div class="report-header">
         <div class="report-title-row">
-          <h3>{{ selectedProduct.aliyunName }} vs {{ selectedProduct.tencentName }}</h3>
+          <h3>{{ selectedProduct.aliyunName }} vs {{ selectedProduct.tencentName }} vs {{ selectedProduct.volcengineName }}</h3>
           <button class="back-btn" @click="resetReport">返回选择</button>
         </div>
         <p class="report-summary">{{ report.summary }}</p>
@@ -49,22 +49,26 @@
 
       <!-- 定价对比 -->
       <div v-if="activeTab === 'pricing'" class="tab-content">
-        <div class="compare-table">
-          <div class="table-header">
-            <span class="col-name">计费维度</span>
-            <span class="col-aliyun">阿里云</span>
-            <span class="col-tencent">腾讯云</span>
-            <span class="col-verdict">结论</span>
-          </div>
-          <div
-            v-for="(item, idx) in report.pricing?.dimensions || []"
-            :key="idx"
-            class="table-row"
-          >
-            <span class="col-name">{{ item.name }}</span>
-            <span class="col-aliyun">{{ item.aliyun }}</span>
-            <span class="col-tencent">{{ item.tencent }}</span>
-            <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+        <div class="compare-table-wrap">
+          <div class="compare-table">
+            <div class="table-header">
+              <span class="col-name">计费维度</span>
+              <span class="col-provider">阿里云</span>
+              <span class="col-provider">腾讯云</span>
+              <span class="col-provider">火山引擎</span>
+              <span class="col-verdict">结论</span>
+            </div>
+            <div
+              v-for="(item, idx) in report.pricing?.dimensions || []"
+              :key="idx"
+              class="table-row"
+            >
+              <span class="col-name">{{ item.name }}</span>
+              <span class="col-provider">{{ item.aliyun }}</span>
+              <span class="col-provider">{{ item.tencent }}</span>
+              <span class="col-provider">{{ item.volcengine || '-' }}</span>
+              <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+            </div>
           </div>
         </div>
         <p v-if="report.pricing?.notes" class="section-notes">{{ report.pricing.notes }}</p>
@@ -72,22 +76,26 @@
 
       <!-- 功能特性 -->
       <div v-if="activeTab === 'features'" class="tab-content">
-        <div class="compare-table">
-          <div class="table-header">
-            <span class="col-name">功能点</span>
-            <span class="col-aliyun">阿里云</span>
-            <span class="col-tencent">腾讯云</span>
-            <span class="col-verdict">结论</span>
-          </div>
-          <div
-            v-for="(item, idx) in report.features?.items || []"
-            :key="idx"
-            class="table-row"
-          >
-            <span class="col-name">{{ item.feature }}</span>
-            <span class="col-aliyun">{{ item.aliyun }}</span>
-            <span class="col-tencent">{{ item.tencent }}</span>
-            <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+        <div class="compare-table-wrap">
+          <div class="compare-table">
+            <div class="table-header">
+              <span class="col-name">功能点</span>
+              <span class="col-provider">阿里云</span>
+              <span class="col-provider">腾讯云</span>
+              <span class="col-provider">火山引擎</span>
+              <span class="col-verdict">结论</span>
+            </div>
+            <div
+              v-for="(item, idx) in report.features?.items || []"
+              :key="idx"
+              class="table-row"
+            >
+              <span class="col-name">{{ item.feature }}</span>
+              <span class="col-provider">{{ item.aliyun }}</span>
+              <span class="col-provider">{{ item.tencent }}</span>
+              <span class="col-provider">{{ item.volcengine || '-' }}</span>
+              <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -105,24 +113,32 @@
               <span class="sla-label">腾讯云</span>
               <span class="sla-value">{{ report.sla_ecosystem.sla.tencent }}</span>
             </div>
+            <div class="sla-item volcengine">
+              <span class="sla-label">火山引擎</span>
+              <span class="sla-value">{{ report.sla_ecosystem.sla.volcengine || '-' }}</span>
+            </div>
           </div>
         </div>
-        <div class="compare-table" v-if="report.sla_ecosystem?.ecosystem?.length">
-          <div class="table-header">
-            <span class="col-name">生态维度</span>
-            <span class="col-aliyun">阿里云</span>
-            <span class="col-tencent">腾讯云</span>
-            <span class="col-verdict">结论</span>
-          </div>
-          <div
-            v-for="(item, idx) in report.sla_ecosystem.ecosystem"
-            :key="idx"
-            class="table-row"
-          >
-            <span class="col-name">{{ item.aspect }}</span>
-            <span class="col-aliyun">{{ item.aliyun }}</span>
-            <span class="col-tencent">{{ item.tencent }}</span>
-            <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+        <div class="compare-table-wrap" v-if="report.sla_ecosystem?.ecosystem?.length">
+          <div class="compare-table">
+            <div class="table-header">
+              <span class="col-name">生态维度</span>
+              <span class="col-provider">阿里云</span>
+              <span class="col-provider">腾讯云</span>
+              <span class="col-provider">火山引擎</span>
+              <span class="col-verdict">结论</span>
+            </div>
+            <div
+              v-for="(item, idx) in report.sla_ecosystem.ecosystem"
+              :key="idx"
+              class="table-row"
+            >
+              <span class="col-name">{{ item.aspect }}</span>
+              <span class="col-provider">{{ item.aliyun }}</span>
+              <span class="col-provider">{{ item.tencent }}</span>
+              <span class="col-provider">{{ item.volcengine || '-' }}</span>
+              <span :class="['col-verdict', verdictClass(item.verdict)]">{{ item.verdict }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -179,6 +195,7 @@ async function selectProduct(product) {
   const steps = [
     '正在抓取阿里云文档...',
     '正在抓取腾讯云文档...',
+    '正在抓取火山引擎文档...',
     '正在分析对比数据...',
     '正在生成对比报告...'
   ]
@@ -193,7 +210,7 @@ async function selectProduct(product) {
   }, 8000)
 
   try {
-    const data = await api.post('/compare/generate', { productKey: product.key }, { timeout: 120000 })
+    const data = await api.post('/compare/generate', { productKey: product.key }, { timeout: 150000 })
     report.value = data.report
     reportMeta.value = { cached: data.cached, generated_at: data.generated_at }
     activeTab.value = 'pricing'
@@ -217,6 +234,7 @@ function verdictClass(verdict) {
   if (!verdict) return ''
   if (verdict.includes('阿里云')) return 'verdict-aliyun'
   if (verdict.includes('腾讯云')) return 'verdict-tencent'
+  if (verdict.includes('火山')) return 'verdict-volcengine'
   return 'verdict-equal'
 }
 
@@ -276,20 +294,21 @@ function formatTime(isoStr) {
 }
 
 .product-vs {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.4;
 }
 
 .vs-tag {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #fff;
   background: var(--primary);
-  padding: 1px 6px;
-  border-radius: 4px;
-  margin: 0 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin: 0 3px;
   vertical-align: middle;
 }
 
@@ -344,11 +363,13 @@ function formatTime(isoStr) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  gap: 8px;
 }
 
 .report-title-row h3 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
+  flex: 1;
 }
 
 .back-btn {
@@ -359,6 +380,7 @@ function formatTime(isoStr) {
   border-radius: 4px;
   padding: 4px 10px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .report-summary {
@@ -415,19 +437,23 @@ function formatTime(isoStr) {
 }
 
 /* Compare Table */
-.compare-table {
+.compare-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 12px;
+}
+
+.compare-table {
+  min-width: 600px;
 }
 
 .table-header {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 1.5fr 0.8fr;
+  grid-template-columns: 1.2fr 1.3fr 1.3fr 1.3fr 0.9fr;
   padding: 10px 12px;
   background: var(--bg);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
@@ -435,9 +461,9 @@ function formatTime(isoStr) {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 1.5fr 0.8fr;
+  grid-template-columns: 1.2fr 1.3fr 1.3fr 1.3fr 0.9fr;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border);
   line-height: 1.4;
@@ -462,6 +488,10 @@ function formatTime(isoStr) {
 
 .verdict-tencent {
   color: #1976d2;
+}
+
+.verdict-volcengine {
+  color: #6f42c1;
 }
 
 .verdict-equal {
@@ -489,12 +519,12 @@ function formatTime(isoStr) {
 
 .sla-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
 }
 
 .sla-item {
-  padding: 12px;
+  padding: 12px 8px;
   border-radius: var(--radius);
   text-align: center;
 }
@@ -509,16 +539,21 @@ function formatTime(isoStr) {
   border: 1px solid #bbdefb;
 }
 
+.sla-item.volcengine {
+  background: #f5f0ff;
+  border: 1px solid #d4b9ff;
+}
+
 .sla-label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-hint);
   margin-bottom: 4px;
 }
 
 .sla-value {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
