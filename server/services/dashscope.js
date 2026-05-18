@@ -89,23 +89,24 @@ ${content}
 }
 
 /**
- * 调用 DashScope API 生成题目
+ * 调用 DashScope API 生成题目（单批次）
  */
-async function generateQuestions(content, options) {
+async function generateQuestionsBatch(content, options) {
   const apiKey = getApiKey();
+  const { types = ['single'], count = 3, difficulty = 3, productName = '' } = options;
 
   const requestBody = {
     model: 'qwen-plus',
     messages: [
       { role: 'system', content: buildSystemPrompt() },
-      { role: 'user', content: buildUserPrompt(content, options) }
+      { role: 'user', content: buildUserPrompt(content, { types, count, difficulty, productName }) }
     ],
     temperature: 0.7,
-    max_tokens: 4096
+    max_tokens: 2048  // 减少单批次 token 限制
   };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 60000);
+  const timer = setTimeout(() => controller.abort(), 30000);  // 单批次超时30秒
 
   try {
     const response = await fetch(API_URL, {
@@ -134,16 +135,72 @@ async function generateQuestions(content, options) {
     }
 
     const questions = parseResponse(rawContent);
-    const validated = validateQuestions(questions, options.types || ['single']);
-
-    if (validated.length === 0) {
-      throw new Error('AI 生成的题目格式无效，请重试');
-    }
+    const validated = validateQuestions(questions, types);
 
     return validated;
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * 分批生成题目（支持进度回调）
+ * @param {string} content 文档内容
+ * @param {object} options 生成参数
+ * @param {function} onProgress 进度回调 (batchIndex, totalBatches, questionsSoFar)
+ */
+async function generateQuestions(content, options, onProgress = null) {
+  const { types = ['single'], count = 10, difficulty = 3, productName = '' } = options;
+  
+  // 分批策略：每批最多4题
+  const BATCH_SIZE = 4;
+  const totalBatches = Math.ceil(count / BATCH_SIZE);
+  const allQuestions = [];
+  
+  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+    // 计算当前批次需要生成的题目数量
+    const remaining = count - allQuestions.length;
+    const batchCount = Math.min(BATCH_SIZE, remaining);
+    
+    // 进度回调
+    if (onProgress) {
+      onProgress(batchIndex + 1, totalBatches, allQuestions.length);
+    }
+    
+    try {
+      const batchQuestions = await generateQuestionsBatch(content, {
+        types,
+        count: batchCount,
+        difficulty,
+        productName
+      });
+      
+      allQuestions.push(...batchQuestions);
+      
+      // 如果已达到目标数量，提前结束
+      if (allQuestions.length >= count) {
+        break;
+      }
+      
+      // 批次间短暂延迟，避免频率限制
+      if (batchIndex < totalBatches - 1) {
+        await new Promise(r => setTimeout(r, 500));
+      }
+    } catch (err) {
+      console.error(`批次 ${batchIndex + 1} 生成失败:`, err.message);
+      // 如果已经有部分题目，继续尝试下一批
+      if (allQuestions.length === 0) {
+        throw err;
+      }
+      // 否则继续下一批
+    }
+  }
+  
+  if (allQuestions.length === 0) {
+    throw new Error('AI 生成的题目格式无效，请重试');
+  }
+  
+  return allQuestions.slice(0, count);  // 确保不超过目标数量
 }
 
 /**

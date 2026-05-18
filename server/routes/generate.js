@@ -28,6 +28,142 @@ router.get('/products', (req, res) => {
   res.json({ products: getProductList() });
 });
 
+// SSE 生成题目（实时进度）
+router.post('/sse', async (req, res) => {
+  const { productName, url, types = ['single'], count = 10, difficulty = 3 } = req.body;
+  const userId = req.userId;
+
+  // 参数校验
+  if (!productName && !url) {
+    return res.status(400).json({ error: '请提供产品名或文档URL' });
+  }
+
+  const validTypes = ['single', 'multiple', 'essay'];
+  const filteredTypes = types.filter(t => validTypes.includes(t));
+  if (filteredTypes.length === 0) {
+    return res.status(400).json({ error: '请至少选择一种题型' });
+  }
+
+  const clampedCount = Math.max(3, Math.min(20, parseInt(count) || 10));
+  const clampedDifficulty = Math.max(1, Math.min(3, parseInt(difficulty) || 3));
+
+  // 限流检查
+  if (!checkRateLimit(userId)) {
+    return res.status(429).json({ error: '生成频率过高，请稍后再试（每小时最多10次）' });
+  }
+
+  // 设置 SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  // SSE 辅助函数
+  function sendEvent(event, data) {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  }
+
+  try {
+    // 1. 抓取文档内容
+    sendEvent('progress', { stage: 'scraping', message: '正在抓取文档内容...' });
+    const docResult = await getDocContent(productName, url);
+    sendEvent('progress', { stage: 'scraping_done', message: '文档抓取完成', productName: docResult.productName });
+
+    // 2. 分批生成题目
+    const questions = await generateQuestions(docResult.content, {
+      types: filteredTypes,
+      count: clampedCount,
+      difficulty: clampedDifficulty,
+      productName: docResult.productName
+    }, (batch, totalBatches, soFar) => {
+      sendEvent('progress', { 
+        stage: 'generating', 
+        message: `正在生成题目（批次 ${batch}/${totalBatches}）...`,
+        current: soFar,
+        total: clampedCount
+      });
+    });
+
+    // 3. 保存到数据库
+    sendEvent('progress', { stage: 'saving', message: '正在保存题目...' });
+    
+    const db = getDb();
+    const timestamp = Date.now();
+    const category = (productName || 'CUSTOM').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const categoryName = docResult.productName || productName || '自定义';
+
+    const savedQuestions = [];
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      const questionId = `gen-${category.toLowerCase()}-${timestamp}-${String(i + 1).padStart(3, '0')}`;
+
+      try {
+        db.run(`
+          INSERT INTO generated_questions (question_id, category, category_name, difficulty, type, question, options, answer, explanation, source_url, product_name, created_by)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          questionId,
+          category,
+          categoryName,
+          clampedDifficulty,
+          q.type,
+          q.question,
+          JSON.stringify(q.options || []),
+          q.answer || '',
+          q.explanation || '',
+          docResult.url,
+          docResult.productName,
+          userId
+        ]);
+
+        const saved = {
+          id: questionId,
+          category,
+          categoryName,
+          difficulty: clampedDifficulty,
+          type: q.type,
+          question: q.question,
+          options: q.options || [],
+          answer: q.answer || '',
+          explanation: q.explanation || ''
+        };
+        savedQuestions.push(saved);
+
+        // 同步到内存中的题库
+        if (global.questionMap) global.questionMap[questionId] = saved;
+        if (global.questionBank) global.questionBank.push(saved);
+        if (global.categoryMap) {
+          if (!global.categoryMap[category]) global.categoryMap[category] = [];
+          global.categoryMap[category].push(saved);
+        }
+      } catch (dbErr) {
+        console.error('保存题目失败:', dbErr.message);
+      }
+    }
+
+    saveDb();
+
+    // 4. 发送完成事件
+    sendEvent('done', {
+      generated: savedQuestions.length,
+      category,
+      categoryName,
+      sourceUrl: docResult.url,
+      questions: savedQuestions.map(q => {
+        const { answer, explanation, ...rest } = q;
+        return rest;
+      })
+    });
+
+  } catch (err) {
+    console.error('生成题目失败:', err.message);
+    sendEvent('error', { error: err.message });
+  } finally {
+    res.end();
+  }
+});
+
 // 生成题目
 router.post('/', async (req, res) => {
   const { productName, url, types = ['single'], count = 10, difficulty = 3 } = req.body;

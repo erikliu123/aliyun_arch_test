@@ -180,14 +180,12 @@ onMounted(async () => {
 
 async function handleGenerate() {
   generating.value = true
-  genStatus.value = '正在抓取文档内容...'
+  genStatus.value = '正在连接...'
   errorMsg.value = ''
 
   try {
-    // 短暂延迟让用户看到状态变化
-    await new Promise(r => setTimeout(r, 500))
-    genStatus.value = 'AI 正在生成题目...'
-
+    const token = localStorage.getItem('token')
+    
     const body = {
       types: selectedTypes.value,
       count: count.value,
@@ -201,15 +199,71 @@ async function handleGenerate() {
       body.productName = ''
     }
 
-    const data = await api.post('/generate', body, { timeout: 90000 })
-    result.value = data
+    // 使用 fetch 处理 SSE
+    const response = await fetch('/api/generate/sse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    })
 
-    // 刷新历史
-    const histData = await api.get('/generate/history')
-    history.value = histData.history || []
+    if (!response.ok) {
+      const errData = await response.json()
+      throw new Error(errData.error || '请求失败')
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      
+      // 解析 SSE 事件
+      const lines = buffer.split('\n')
+      buffer = ''
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        
+        if (line.startsWith('event: ')) {
+          const eventType = line.substring(7)
+          // 下一行是 data
+          if (i + 1 < lines.length && lines[i + 1].startsWith('data: ')) {
+            const dataLine = lines[i + 1].substring(6)
+            try {
+              const data = JSON.parse(dataLine)
+              
+              if (eventType === 'progress') {
+                genStatus.value = data.message
+              } else if (eventType === 'done') {
+                result.value = data
+                generating.value = false
+                
+                // 刷新历史
+                try {
+                  const histData = await api.get('/generate/history')
+                  history.value = histData.history || []
+                } catch (e) {}
+              } else if (eventType === 'error') {
+                errorMsg.value = data.error || '生成失败'
+                generating.value = false
+              }
+            } catch (e) {
+              // JSON 解析失败，忽略
+            }
+            i++ // 跳过 data 行
+          }
+        }
+      }
+    }
   } catch (e) {
-    errorMsg.value = e.error || e.message || '生成失败，请稍后重试'
-  } finally {
+    errorMsg.value = e.message || '生成失败，请稍后重试'
     generating.value = false
   }
 }
