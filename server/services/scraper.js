@@ -77,6 +77,53 @@ async function scrapeContent(url, options = {}) {
  * 从HTML中提取主要文本内容
  */
 function extractContent(html) {
+  // 先尝试从阿里云动态页面提取 JSON 数据
+  const jsonMatch = html.match(/window\.__ICE_PAGE_PROPS__\s*=\s*({[\s\S]*?});?\s*<\/script>/);
+  if (jsonMatch) {
+    try {
+      const pageProps = JSON.parse(jsonMatch[1]);
+      // 尝试从 productData.storeData.data 中提取内容
+      const storeData = pageProps?.productData?.storeData?.data;
+      if (storeData) {
+        let extractedText = '';
+        
+        // 提取学习路径内容
+        if (storeData.learningPath && storeData.learningPath.chapters) {
+          extractedText += '学习路径:\n';
+          for (const chapter of storeData.learningPath.chapters) {
+            extractedText += `${chapter.title}\n`;
+            if (chapter.sections) {
+              for (const section of chapter.sections) {
+                extractedText += `  ${section.title}\n`;
+                if (section.items) {
+                  for (const item of section.items) {
+                    extractedText += `    ${item.title}\n`;
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        // 提取产品简介
+        if (storeData.introduction && storeData.introduction.brief) {
+          extractedText += `\n产品简介: ${storeData.introduction.brief}\n`;
+        }
+        
+        // 提取标题
+        if (storeData.title) {
+          extractedText += `\n产品名称: ${storeData.title}\n`;
+        }
+        
+        if (extractedText.length > 200) {
+          return extractedText.trim();
+        }
+      }
+    } catch (e) {
+      // JSON 解析失败，继续用 cheerio
+    }
+  }
+  
   const $ = cheerio.load(html);
 
   // 移除无关元素

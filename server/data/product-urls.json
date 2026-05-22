@@ -1,38 +1,38 @@
 {
   "dashscope": {
-    "url": "https://help.aliyun.com/zh/dashscope/",
+    "url": "https://help.aliyun.com/zh/dashscope/developer-reference/api-details",
     "name": "灵积模型服务DashScope"
   },
   "bailian": {
-    "url": "https://help.aliyun.com/zh/model-bailian/",
+    "url": "https://help.aliyun.com/zh/model-bailian/getting-started/what-is-model-bailian",
     "name": "百炼一站式大模型平台"
   },
   "pai": {
-    "url": "https://help.aliyun.com/zh/pai/",
+    "url": "https://help.aliyun.com/zh/pai/product-overview/what-is-machine-learning-platform-for-ai",
     "name": "机器学习平台PAI"
   },
   "eas": {
-    "url": "https://help.aliyun.com/zh/pai/user-guide/eas-model-service-deployment/",
+    "url": "https://help.aliyun.com/zh/pai/user-guide/model-service-deployment-by-using-the-pai-console",
     "name": "PAI-EAS模型在线服务"
   },
   "gpuecs": {
-    "url": "https://help.aliyun.com/zh/ecs/user-guide/gpu-accelerated-instances/",
+    "url": "https://help.aliyun.com/zh/ecs/user-guide/gpu-accelerated-compute-optimized-instance-families",
     "name": "GPU云服务器"
   },
   "milvus": {
-    "url": "https://help.aliyun.com/zh/milvus/",
+    "url": "https://help.aliyun.com/zh/milvus/product-overview/what-is-milvus",
     "name": "向量检索服务Milvus"
   },
   "pai-dlc": {
-    "url": "https://help.aliyun.com/zh/pai/user-guide/dlc-deep-learning-containers/",
+    "url": "https://help.aliyun.com/zh/pai/user-guide/create-a-deep-learning-job",
     "name": "PAI-DLC深度学习容器"
   },
   "pai-dsw": {
-    "url": "https://help.aliyun.com/zh/pai/user-guide/dsw-notebook/",
+    "url": "https://help.aliyun.com/zh/pai/user-guide/create-and-manage-dsw-instances",
     "name": "PAI-DSW数据科学工作站"
   },
   "llmdeploy": {
-    "url": "https://help.aliyun.com/zh/pai/user-guide/model-deployment/",
+    "url": "https://help.aliyun.com/zh/pai/user-guide/one-click-deploy-deepseek",
     "name": "大模型部署服务"
   },
   "flink": {
